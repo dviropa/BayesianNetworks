@@ -9,6 +9,12 @@ public class CPT {
     public CPT(Variable variable) {
         this.variable = variable;
     }
+    public double getProb(String value, List<String> parentValues) {
+        List<String> full = new ArrayList<>(parentValues);
+        full.add(value);
+        int index = bace.getCPTIndex(this.variable, full);
+        return this.probabilities.get(index);
+    }
 
     public void addParent(Variable parent) {
         parents.add(parent);
