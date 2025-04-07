@@ -31,6 +31,37 @@ public interface bace {
         }
         return assignment;
     }
+    public static Map<String, List<String>> questionsToMap(String question) {
+        Map<String, List<String>> map = new HashMap<>();
+
+        if (!question.contains("|")) {
+            // שאלה לא מותנית: P(B=T)
+            String[] parts = question.replace("P(", "").replace(")", "").split("=");
+            String var = parts[0].trim();
+            map.put(var, new ArrayList<>());
+        } else {
+            // שאלה מותנית: P(B=T | J=T, M=T)
+            question = question.replace("P(", "").replace(")", "");
+            String[] parts = question.split("\\|");
+
+            String left = parts[0].trim();  // B=T
+            String right = parts[1].trim(); // J=T, M=T
+
+            String queryVar = left.split("=")[0].trim();
+            String[] evidenceAssignments = right.split(",");
+
+            List<String> evidenceVars = new ArrayList<>();
+            for (String assign : evidenceAssignments) {
+                String ev = assign.split("=")[0].trim();
+                evidenceVars.add(ev);
+            }
+
+            map.put(queryVar, evidenceVars);
+        }
+
+        return map;
+    }
+
     static int getCPTIndex(Variable var, List<String> orderedValues) {
         List<Variable> parents = var.getParents();
         List<Integer> domainSizes = new ArrayList<>();
