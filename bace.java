@@ -2,10 +2,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public interface bace {
      Double calc();
@@ -92,7 +89,21 @@ public interface bace {
 
 
 
+    public static Map<String, String> parseQuestion(String question) {
+        Map<String, String> result = new LinkedHashMap<>();
 
+        String inside = question.substring(question.indexOf('(') + 1, question.indexOf(')'));
+        String[] parts = inside.split(",");
+
+        for (String part : parts) {
+            String[] split = part.split("=");
+            String var = split[0].trim();
+            String val = split[1].trim().toUpperCase(); // T or F
+            result.put(var, val);
+        }
+
+        return result;
+    }
 
 
 }
