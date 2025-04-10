@@ -30,7 +30,7 @@ public class Factor {
             this.nams.add(v.getName());
         }
         this.nams.add(c.variable.getName());
-        System.out.println("cpt: " + c.toString());
+//        System.out.println("cpt: " + c.toString());
     }
 
     public List<String> getnams() {
@@ -46,7 +46,7 @@ public class Factor {
     }
 
     private int getIndexFor(Map<String, String> assignment, List<String> orderedVarNames, String fileName) {
-        Map<String, Variable> variableMap = bace.getVariable(fileName);
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         List<Map<String, String>> allCombinations = generateOutcomeCombinations(variableMap, orderedVarNames);
 
         for (int i = 0; i < allCombinations.size(); i++) {
@@ -69,7 +69,7 @@ public class Factor {
         }
 
         // הדפסה לדיבאג
-        System.out.println("❌ Combo not found: " + assignment);
+//        System.out.println("❌ Combo not found: " + assignment);
         return -1;
     }
 
@@ -77,13 +77,13 @@ public class Factor {
     public double getProbability(Map<String, String> assignment) {
         int index = getCombinationIndex(this.nams, assignment, fileName);
         if (index == -1) {
-            System.out.println("❌ Combo not found: " + assignment);
+//            System.out.println("❌ Combo not found: " + assignment);
         }
         return this.values.get(index);
     }
 
     public static int getCombinationIndex(List<String> variableNames, Map<String, String> targetAssignment, String fileName) {
-        Map<String, Variable> variableMap = bace.getVariable(fileName);
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         List<Map<String, String>> combinations = generateOutcomeCombinations(variableMap, variableNames);
 
         for (int i = 0; i < combinations.size(); i++) {
@@ -138,7 +138,7 @@ public class Factor {
             }
         }
 
-        Map<String, Variable> variableMap = bace.getVariable(fileName);
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         List<String> allVarNames = newScope.stream().map(Variable::getName).collect(Collectors.toList());
         List<Map<String, String>> allCombinations = generateOutcomeCombinations(variableMap, allVarNames);
 
@@ -148,7 +148,7 @@ public class Factor {
             int idx2 = getIndexFor(combo, f2.nams, fileName);
 
             if (idx1 == -1 || idx2 == -1) {
-                System.out.println("❌ Combo not found: " + combo + "\n  idx1: " + idx1 + " | idx2: " + idx2);
+//                System.out.println("❌ Combo not found: " + combo + "\n  idx1: " + idx1 + " | idx2: " + idx2);
             }
 
             double v1 = (idx1 >= 0 && idx1 < this.values.size()) ? this.values.get(idx1) : 1.0;
@@ -157,8 +157,8 @@ public class Factor {
             newValues.add(v1 * v2);
         }
 
-        System.out.println("[UNION] New scope: " + allVarNames);
-        System.out.println("[UNION] Values: " + newValues);
+//        System.out.println("[UNION] New scope: " + allVarNames);
+//        System.out.println("[UNION] Values: " + newValues);
 
         return new Factor(newScope, newValues, allVarNames, fileName);
     }
@@ -174,7 +174,7 @@ public class Factor {
     }
 
     public Factor variable_Elimination(List<String> keepNames) {
-        Map<String, Variable> variableMap = bace.getVariable(fileName);
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         List<String> allNames = this.scope.stream().map(Variable::getName).collect(Collectors.toList());
         List<String> eliminateNames = allNames.stream().filter(name -> !keepNames.contains(name)).collect(Collectors.toList());
         List<Map<String, String>> keepCombinations = generateOutcomeCombinations(variableMap, keepNames);
@@ -193,8 +193,8 @@ public class Factor {
         }
 
         List<Variable> newScope = this.scope.stream().filter(v -> keepNames.contains(v.getName())).collect(Collectors.toList());
-        System.out.println("[ELIMINATION] Keep: " + keepNames + ", Eliminate: " + eliminateNames);
-        System.out.println("[ELIMINATION] Resulting values: " + newValues);
+//        System.out.println("[ELIMINATION] Keep: " + keepNames + ", Eliminate: " + eliminateNames);
+//        System.out.println("[ELIMINATION] Resulting values: " + newValues);
         return new Factor(newScope, newValues, keepNames, fileName);
     }
 }

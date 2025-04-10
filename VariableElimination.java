@@ -54,8 +54,8 @@ public class VariableElimination implements baceStrategy {
         if(buton.getvarubels().size()>1){
             buton.normalize();
         }
-        System.out.println(top.getvalues());
-        System.out.println(buton.getvalues());
+//        System.out.println(top.getvalues());
+//        System.out.println(buton.getvalues());
         Map<String, String> topmap =queryToMap(question,fileName);
         Map<String, String> butonmap =queryToMap(question,fileName);
         butonmap.remove(queryVar);

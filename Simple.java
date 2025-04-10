@@ -18,13 +18,13 @@ public class Simple implements baceStrategy {
 
     @Override
     public Double calc() {
-        Map<String, Variable> variableMap = bace.getVariable(fileName);
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
 
         // חלק את השאלה ל-P(X=...|Y=...) → P(X,Y) / P(Y)
         String[] parts = question.substring(2, question.length() - 1).split("\\|");
 
-        Map<String, String> queryVars = bace.parseQuestion("P(" + parts[0] + ")");
-        Map<String, String> evidenceVars = parts.length > 1 ? bace.parseQuestion("P(" + parts[1] + ")") : new HashMap<>();
+        Map<String, String> queryVars = baceStrategy.parseQuestion("P(" + parts[0] + ")");
+        Map<String, String> evidenceVars = parts.length > 1 ? baceStrategy.parseQuestion("P(" + parts[1] + ")") : new HashMap<>();
 
         // מונה - X ∪ Y
         Map<String, String> numerator = new HashMap<>(queryVars);

@@ -15,8 +15,8 @@ public class JointProbability implements baceStrategy {
     }
     @Override
     public Double calc() {
-        Map<String, Variable> variableMap = bace.getVariable(fileName);
-        Map<String, String> assignment = bace.parseQuestion(question);
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
+        Map<String, String> assignment = baceStrategy.parseQuestion(question);
 
 
         double ANS = 1.0;

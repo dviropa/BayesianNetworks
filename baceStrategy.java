@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.*;
 
 public interface baceStrategy {
-     Double calc();
-     static Map<String, Variable> getVariable(String fileName){
+    Double calc();
+    static Map<String, Variable> getVariable(String fileName){
         Map<String, Variable> variableMap;
         try {
             variableMap = ReadXMLFile.reade(fileName);
@@ -16,7 +16,7 @@ public interface baceStrategy {
         }
         return variableMap;
     }
-     static Map<String, String> questionsToMap(List<String> questions) {
+    static Map<String, String> questionsToMap(List<String> questions) {
         Map<String, String> assignment = new HashMap<>();
         for (String q : questions) {
             if (q.contains("=")) {

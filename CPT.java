@@ -12,7 +12,7 @@ public class CPT {
     public double getProb(String value, List<String> parentValues) {
         List<String> full = new ArrayList<>(parentValues);
         full.add(value);
-        int index = bace.getCPTIndex(this.variable, full);
+        int index = baceStrategy.getCPTIndex(this.variable, full);
         return this.probabilities.get(index);
     }
 
