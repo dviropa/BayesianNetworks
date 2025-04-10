@@ -3,7 +3,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Simple implements bace {
+public class Simple implements baceStrategy {
     private String question;
     private String fileName;
 

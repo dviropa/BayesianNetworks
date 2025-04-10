@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class JointProbability implements bace {
+public class JointProbability implements baceStrategy {
     private String question;
     private String fileName;
     public static int multCount = 0;

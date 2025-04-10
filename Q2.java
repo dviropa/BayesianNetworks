@@ -1,21 +1,21 @@
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Q2 implements bace {
+public class VariableElimination implements baceStrategy {
     private String question;
     private String fileName;
     public static int multCount = 0;
     public static int addCount = 0;
 
-    public Q2(String question, String fileName) {
+    public VariableElimination(String question, String fileName) {
         this.question = question;
         this.fileName = fileName;
     }
 
     @Override
     public Double calc() {
-        Map<String, Variable> variableMap = bace.getVariable(fileName);
-        Map<String, List<String>> q = bace.questionsToMap(question);
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
+        Map<String, List<String>> q = baceStrategy.questionsToMap(question);
         String queryVar = q.keySet().iterator().next();
         List<String> evidenceVars = q.get(queryVar);
 
@@ -76,7 +76,7 @@ public class Q2 implements bace {
     }
 
     private static Map<String, String> queryToMap(String query, String fileName) {
-        Map<String, Variable> variableMap = bace.getVariable(fileName);
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         Map<String, String> map = new HashMap<>();
         String inside = query.substring(2, query.length() - 1); // מוריד את P( )
         for (String part : inside.split("[,|]")) {
@@ -98,7 +98,7 @@ public class Q2 implements bace {
 
 
     public static void main(String[] args) {
-        Q2 s = new Q2("P(B=T|J=T,M=T)", "alarm_net.xml");
+        VariableElimination s = new VariableElimination("P(B=T|J=T,M=T)", "alarm_net.xml");
         System.out.println("Result: " + s.calc());
     }
 }

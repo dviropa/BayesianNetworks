@@ -4,7 +4,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.util.*;
 
-public interface bace {
+public interface baceStrategy {
      Double calc();
      static Map<String, Variable> getVariable(String fileName){
         Map<String, Variable> variableMap;
