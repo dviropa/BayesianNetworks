@@ -3,7 +3,9 @@ import java.util.List;
 
 public class Variable {
     private String name;
-    private List<String> values = new ArrayList<>();  // חובה לאתחל!
+    private List<String> values = new ArrayList<>();
+    private List<String> OUTCOMES = new ArrayList<>();  // חובה לאתחל!
+
     private List<Variable> parents = new ArrayList<>();
     private CPT cpt;  // טבלת הסתברויות מותנות
 
@@ -23,6 +25,14 @@ public class Variable {
         return this.cpt;
     }
 
+    public void addToOutcomes(String value) {
+        this.OUTCOMES.add(value);
+    }
+    public List<String> getOUTCOMES() {
+        return this.OUTCOMES;
+    }
+
+
     public void setCPT(CPT cpt) {
         this.cpt = cpt;
     }
@@ -37,6 +47,8 @@ public class Variable {
     public List<Variable> getParents() {
         return this.parents;
     }
+
+
 
     @Override
     public String toString() {

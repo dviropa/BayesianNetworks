@@ -22,7 +22,7 @@ public class Q2 implements bace {
 
         List<Factor> factors = new ArrayList<>();
         for (Variable v : variableMap.values()) {
-            factors.add(new Factor(v.getCPT()));
+            factors.add(new Factor(v.getCPT(),fileName));
         }
         Factor finall = null;
         while (factors.size() > 0) {
@@ -56,8 +56,8 @@ public class Q2 implements bace {
         }
         System.out.println(top.getvalues());
         System.out.println(buton.getvalues());
-        Map<String, Integer> topmap =queryToMap(question);
-        Map<String, Integer> butonmap =queryToMap(question);
+        Map<String, String> topmap =queryToMap(question,fileName);
+        Map<String, String> butonmap =queryToMap(question,fileName);
         butonmap.remove(queryVar);
         return Math.round((top.getProbability(topmap) / buton.getProbability(butonmap)) * 100000.0) / 100000.0;
 
@@ -75,22 +75,33 @@ public class Q2 implements bace {
         return Integer.compare(names1.size(), names2.size());
     }
 
-    private static Map<String, Integer> queryToMap(String query) {
-        Map<String, Integer> map = new HashMap<>();
-        String inside = query.substring(2, query.length() - 1); // בלי P( )
+    private static Map<String, String> queryToMap(String query, String fileName) {
+        Map<String, Variable> variableMap = bace.getVariable(fileName);
+        Map<String, String> map = new HashMap<>();
+        String inside = query.substring(2, query.length() - 1); // מוריד את P( )
         for (String part : inside.split("[,|]")) {
-            String[] split = part.split("=");
-            map.put(split[0], split[1].equals("T") ? 1 : 0);
+            String[] split = part.split("="); // מפרק ל: משתנה וערך
+            String varName = split[0].trim();
+            String outcome = split[1].trim();
+            Variable var = variableMap.get(varName);
+            if (var == null) {
+                throw new RuntimeException("Variable not found: " + varName);
+            }
+            List<String> outcomes = var.getOUTCOMES();
+            if (!outcomes.contains(outcome)) {
+                throw new RuntimeException("Outcome '" + outcome + "' not found in variable " + varName);
+            }
+            map.put(varName, outcome);
         }
         return map;
     }
+
 
     public static void main(String[] args) {
         Q2 s = new Q2("P(B=T|J=T,M=T)", "alarm_net.xml");
         System.out.println("Result: " + s.calc());
     }
 }
-
 
 
 
