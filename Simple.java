@@ -7,6 +7,10 @@ public class Simple implements bace {
     private String question;
     private String fileName;
 
+    public static int multCount = 0;
+    public static int addCount = 0;
+
+
     public Simple(String question, String fileName) {
         this.question = question;
         this.fileName = fileName;
@@ -28,7 +32,9 @@ public class Simple implements bace {
 
         // מחשב מונה ומכנה על כל ההשלמות האפשריות
         double num = sumOverCombinations(variableMap, numerator);
+        System.out.println(num);
         double denom = sumOverCombinations(variableMap, evidenceVars);
+        System.out.println(denom);
 
         return Math.round((num / denom) * 100000.0) / 100000.0;
     }
@@ -43,7 +49,7 @@ public class Simple implements bace {
 
         int total = (int) Math.pow(2, missing.size());
         double sum = 0.0;
-
+        JointProbability jp;
         for (int i = 0; i < total; i++) {
             Map<String, String> fullAssign = new HashMap<>(known);
             for (int j = 0; j < missing.size(); j++) {
@@ -60,8 +66,11 @@ public class Simple implements bace {
             }
             q.append(")");
 
-            JointProbability jp = new JointProbability(q.toString(), fileName);
+            jp = new JointProbability(q.toString(), fileName);
             sum += jp.calc();
+            addCount++;
+            addCount+=jp.addCount;
+            multCount+=jp.multCount;
         }
 
         return sum;
@@ -70,5 +79,11 @@ public class Simple implements bace {
     public static void main(String[] args) {
         Simple s = new Simple("P(B=T|J=T,M=T)", "alarm_net.xml");
         System.out.println("Result: " + s.calc());
+        System.out.println("addCount: " + addCount);
+        System.out.println("multCount: " + multCount);
+
+
+
+
     }
 }

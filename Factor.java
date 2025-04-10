@@ -40,6 +40,17 @@ public class Factor {
         }
         return index;
     }
+    public double getProbability(Map<String, Integer> assignment) {
+//        int index = getIndexFor(assignment, this)%assignment.size()-1;
+        List<Variable> vars = this.getvarubels();
+        int index = 0;
+        for (int i = 0; i < vars.size(); i++) {
+            int val = assignment.get(vars.get(i).getName());
+            index += val << (vars.size() - i - 1);
+        }
+        return this.values.get(index);
+    }
+
 
     public Factor unione(Factor f2) {
         List<Variable> newScope = new ArrayList<>();

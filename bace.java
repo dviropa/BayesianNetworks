@@ -87,6 +87,12 @@ public interface bace {
         return index;
     }
 
+    public static String getQueryVariable(String question) {
+        String inner = question.substring(2, question.length() - 1); // מסיר את P( ו־)
+        String[] parts = inner.split("\\|");
+        String queryPart = parts[0].trim(); // למשל "B=T"
+        return queryPart.split("=")[0].trim(); // מחזיר רק את שם המשתנה: "B"
+    }
 
 
     public static Map<String, String> parseQuestion(String question) {

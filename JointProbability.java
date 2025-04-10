@@ -3,10 +3,15 @@ import java.util.*;
 public class JointProbability implements bace {
     private String question;
     private String fileName;
+    public static int multCount = 0;
+    public static int addCount = 0;
+
 
     public JointProbability(String question, String fileName) {
         this.question = question;
         this.fileName = fileName;
+        multCount = 0;
+        addCount = 0;
     }
     @Override
     public Double calc() {
@@ -28,9 +33,12 @@ public class JointProbability implements bace {
 
             double prob = variable.getCPT().getProb(valStr, parentVals);
             ANS *= prob;
+            multCount++;
         }
 
-        return Math.round(ANS * 100000.0) / 100000.0;    }
+//        return Math.round(ANS * 100000.0) / 100000.0;
+        return ANS;
+}
 
 
 
@@ -38,7 +46,7 @@ public class JointProbability implements bace {
     public static void main(String[] args) {
         JointProbability s = new JointProbability("P(B=F,E=T,A=T,M=T,J=F)", "alarm_net.xml");
         System.out.println("Result: " + s.calc());
-
+        System.out.println(multCount);
 
     }
 }
