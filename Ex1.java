@@ -15,8 +15,11 @@ public class Ex1 {
                 StrategyHandler handler = new StrategyHandler(task.question, parsed.fileName);
                 handler.setStrategyByNumber(task.algorithmNumber);
                 List<Double> result = handler.calc();
+                if(result != null)
 
-                writer.write("📌 " + task.question + " using Algorithm " + task.algorithmNumber + " → Result: " + result + "\n");
+                    System.out.println("📌 " + task.question + " using Algorithm " + task.algorithmNumber + " → Result: " + result.get(0)+","+result.get(1)+","+result.get(2) + "\n");
+                if(result != null)
+                    writer.write("📌 " + task.question + " using Algorithm " + task.algorithmNumber + " → Result: " + result.get(0)+","+result.get(1)+","+result.get(2) + "\n");
             }
 
             System.out.println("✅ Results written to: " + outputFile);
