@@ -4,8 +4,8 @@ import java.util.stream.Collectors;
 public class VariableElimination implements baceStrategy {
     private String question;
     private String fileName;
-    public static int multCount = 0;
-    public static int addCount = 0;
+    public static double multCount = 0;
+    public static double addCount = 0;
 
     public VariableElimination(String question, String fileName) {
         this.question = question;
@@ -13,7 +13,7 @@ public class VariableElimination implements baceStrategy {
     }
 
     @Override
-    public Double calc() {
+    public List<Double> calc() {
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         Map<String, List<String>> q = baceStrategy.questionsToMap(question);
         String queryVar = q.keySet().iterator().next();
@@ -43,14 +43,23 @@ public class VariableElimination implements baceStrategy {
             }
             else {
                 finall=finall.unione(smaller);
+                multCount+=finall.multCount;
+                addCount+=finall.addCount;
+
+
+
             }
         }
         evidenceVars.add(queryVar);
         Factor top=finall.variable_Elimination(evidenceVars);
+        multCount+=finall.multCount;
+        addCount+=finall.addCount;
         top.normalize();
         List<String> evidenceOnly = new ArrayList<>(evidenceVars);
         evidenceOnly.remove(queryVar);
         Factor buton=finall.variable_Elimination(evidenceOnly);
+        multCount+=finall.multCount;
+        addCount+=finall.addCount;
         if(buton.getvarubels().size()>1){
             buton.normalize();
         }
@@ -59,8 +68,13 @@ public class VariableElimination implements baceStrategy {
         Map<String, String> topmap =queryToMap(question,fileName);
         Map<String, String> butonmap =queryToMap(question,fileName);
         butonmap.remove(queryVar);
-        return Math.round((top.getProbability(topmap) / buton.getProbability(butonmap)) * 100000.0) / 100000.0;
+        List<Double> list = new ArrayList<>();
+        list.add(Math.round((top.getProbability(topmap) / buton.getProbability(butonmap)) * 100000.0) / 100000.0);
+        list.add(multCount);
+        list.add(addCount);
 
+//        return Math.round((top.getProbability(topmap) / buton.getProbability(butonmap)) * 100000.0) / 100000.0;
+return list;
     }
     private int compareFactorsAlphabetically(Factor f1, Factor f2) {
         // קבל את רשימת שמות המשתנים של כל פקטור
@@ -99,13 +113,58 @@ public class VariableElimination implements baceStrategy {
 
     public static void main(String[] args) {
         VariableElimination s = new VariableElimination("P(B=T|J=T,M=T)", "alarm_net.xml");
+
         System.out.println("Result: " + s.calc());
+        System.out.println(s.multCount);
+        System.out.println(s.addCount);
     }
-}
 
 
 
 
+
+
+
+
+
+
+//
+//    public static void main(String[] args) {
+////        Q2 s = new Q2("P(B=T|J=T,M=T)", "alarm_net.xml");
+////        System.out.println("Result: " + s.calc());
+//        System.out.println("_________________________");
+//        String filename="alarm_net.xml";
+//        Map<String, Variable> variableMap = baceStrategy.getVariable("alarm_net.xml");
+//        Factor f3=new Factor(variableMap.get("A").getCPT(),filename);
+//        Factor f2=new Factor(variableMap.get("B").getCPT(),filename);
+//        Factor f4=new Factor(variableMap.get("J").getCPT(),filename);
+//        Factor f5=new Factor(variableMap.get("M").getCPT(),filename);
+//        Factor f1=new Factor(variableMap.get("E").getCPT(),filename);
+////        f4=f4.restrict("J",1);
+////        f5=f5.restrict("M",1);
+//        Factor fA = f3.unione(f4).unione(f5);
+//        Factor fAE = fA.unione(f1);
+//        Factor fBE = fAE.variable_Elimination(List.of("B", "J","M")); // keep B and E
+//        Factor fB = fBE.unione(f2);
+//        fB.normalize();
+//        System.out.println("____________________________");
+//
+//        // P(J,T,M=T)
+//        Factor fJ = new Factor(variableMap.get("J").getCPT(),filename);//.restrict("J", 1)
+//        Factor fM = new Factor(variableMap.get("M").getCPT(),filename);//.restrict("M", 1)
+//        fA = new Factor(variableMap.get("A").getCPT(),filename);
+//        Factor fb=new Factor(variableMap.get("B").getCPT(),filename);
+//        Factor fE = new Factor(variableMap.get("E").getCPT(),filename);
+//
+//        Factor full = f1.unione(f2).unione(f3).unione(f4).unione(f5);
+//        full = full.variable_Elimination(List.of("J", "M")); // נשאיר רק אותם
+////        full = full.restrict("J", 1).restrict("M", 1);
+//        full.normalize();
+//        System.out.println(full.getvalues());
+//        System.out.println("P(B=T | J=T, M=T) = " + fB.getvalues().get(0) / full.getvalues().get(0));
+//
+//        System.out.println("____________________________");
+//    }
 
 
 
@@ -114,33 +173,46 @@ public class VariableElimination implements baceStrategy {
 ////        Q2 s = new Q2("P(B=T|J=T,M=T)", "alarm_net.xml");
 ////        System.out.println("Result: " + s.calc());
 //    System.out.println("_________________________");
-//    Map<String, Variable> variableMap = bace.getVariable("alarm_net.xml");
-//    Factor f3=new Factor(variableMap.get("A").getCPT());
-//    Factor f2=new Factor(variableMap.get("B").getCPT());
-//    Factor f4=new Factor(variableMap.get("J").getCPT());
-//    Factor f5=new Factor(variableMap.get("M").getCPT());
-//    Factor f1=new Factor(variableMap.get("E").getCPT());
+//    String filename="alarm_net.xml";
+//    Map<String, Variable> variableMap = baceStrategy.getVariable("alarm_net.xml");
+//    Factor f3=new Factor(variableMap.get("A").getCPT(),filename).variable_Elimination(List.of("B"));
+//    Factor f2=new Factor(variableMap.get("B").getCPT(),filename);
+//    Factor f4=new Factor(variableMap.get("J").getCPT(),filename).variable_Elimination(List.of("J"));
+//    Factor f5=new Factor(variableMap.get("M").getCPT(),filename).variable_Elimination(List.of("M"));
+//    Factor f1=new Factor(variableMap.get("E").getCPT(),filename);
 ////        f4=f4.restrict("J",1);
 ////        f5=f5.restrict("M",1);
 //    Factor fA = f3.unione(f4).unione(f5);
-//    Factor fAE = fA.unione(f1);
+//    Factor fAE = fA.unione(f1).variable_Elimination(List.of("J","B"));
 //    Factor fBE = fAE.variable_Elimination(List.of("B", "J","M")); // keep B and E
 //    Factor fB = fBE.unione(f2);
 //    fB.normalize();
 //    System.out.println("____________________________");
 //
 //    // P(J,T,M=T)
-//    Factor fJ = new Factor(variableMap.get("J").getCPT());//.restrict("J", 1)
-//    Factor fM = new Factor(variableMap.get("M").getCPT());//.restrict("M", 1)
-//    fA = new Factor(variableMap.get("A").getCPT());
-//    Factor fE = new Factor(variableMap.get("E").getCPT());
-//
+//    Factor fJ = new Factor(variableMap.get("J").getCPT(),filename).variable_Elimination(List.of("J"));//.restrict("J", 1)
+//    Factor fM = new Factor(variableMap.get("M").getCPT(),filename).variable_Elimination(List.of("M"));//.restrict("M", 1)
+//    fA = new Factor(variableMap.get("A").getCPT(),filename);
+//    Factor fE = new Factor(variableMap.get("E").getCPT(),filename);
+//    Factor fb = new Factor(variableMap.get("B").getCPT(),filename);
+//    Factor ft=fb.unione(fA).unione(fE);
+//fJ=fJ.unione(fM).variable_Elimination(List.of("J","M"));
+//fJ.unione(ft).variable_Elimination(List.of("J","M"));
 //    Factor full = f1.unione(f2).unione(f3).unione(f4).unione(f5);
 //    full = full.variable_Elimination(List.of("J", "M")); // נשאיר רק אותם
 ////        full = full.restrict("J", 1).restrict("M", 1);
 //    full.normalize();
 //    System.out.println(full.getvalues());
-//    System.out.println("P(B=T | J=T, M=T) = " + fB.getvalues().get(0) / full.getvalues().get(0));
+//    System.out.println("P(B=T | J=T, M=T) = " + fB.getvalues().get(0) / fJ.getvalues().get(0));
 //
 //    System.out.println("____________________________");
 //}
+
+
+}
+
+
+
+
+
+

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.*;
 
 public interface baceStrategy {
-    Double calc();
+    List<Double> calc();
     static Map<String, Variable> getVariable(String fileName){
         Map<String, Variable> variableMap;
         try {

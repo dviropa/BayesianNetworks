@@ -7,8 +7,8 @@ public class Simple implements baceStrategy {
     private String question;
     private String fileName;
 
-    public static int multCount = 0;
-    public static int addCount = 0;
+    public static double multCount = 0;
+    public static double addCount = 0;
 
 
     public Simple(String question, String fileName) {
@@ -17,7 +17,7 @@ public class Simple implements baceStrategy {
     }
 
     @Override
-    public Double calc() {
+    public List<Double> calc() {
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
 
         // חלק את השאלה ל-P(X=...|Y=...) → P(X,Y) / P(Y)
@@ -35,8 +35,12 @@ public class Simple implements baceStrategy {
         System.out.println(num);
         double denom = sumOverCombinations(variableMap, evidenceVars);
         System.out.println(denom);
-
-        return Math.round((num / denom) * 100000.0) / 100000.0;
+        List<Double> list = new ArrayList<>();
+        list.add(Math.round((num / denom) * 100000.0) / 100000.0);
+        list.add(multCount);
+        list.add(addCount);
+//        return Math.round((num / denom) * 100000.0) / 100000.0;
+        return list;
     }
 
     private double sumOverCombinations(Map<String, Variable> variableMap, Map<String, String> known) {
@@ -67,7 +71,7 @@ public class Simple implements baceStrategy {
             q.append(")");
 
             jp = new JointProbability(q.toString(), fileName);
-            sum += jp.calc();
+            sum += jp.calc().get(0);
             addCount++;
             addCount+=jp.addCount;
             multCount+=jp.multCount;

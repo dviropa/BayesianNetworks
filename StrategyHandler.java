@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class StrategyHandler {
     private baceStrategy strategy;
     private String question;
@@ -17,7 +19,7 @@ public class StrategyHandler {
         }
     }
 
-    public double calc() {
+    public List<Double> calc() {
         if (strategy == null) {
             throw new IllegalStateException("Strategy not set. Call setStrategyByNumber() first.");
         }

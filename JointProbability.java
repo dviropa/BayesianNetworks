@@ -3,8 +3,8 @@ import java.util.*;
 public class JointProbability implements baceStrategy {
     private String question;
     private String fileName;
-    public static int multCount = 0;
-    public static int addCount = 0;
+    public static double multCount = 0;
+    public static double addCount = 0;
 
 
     public JointProbability(String question, String fileName) {
@@ -14,7 +14,7 @@ public class JointProbability implements baceStrategy {
         addCount = 0;
     }
     @Override
-    public Double calc() {
+    public List<Double> calc() {
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         Map<String, String> assignment = baceStrategy.parseQuestion(question);
 
@@ -35,9 +35,14 @@ public class JointProbability implements baceStrategy {
             ANS *= prob;
             multCount++;
         }
-
+        List<Double> list = new ArrayList<>();
+        list.add(ANS);
+        list.add(multCount);
+        list.add(addCount);
+//        return Math.round((num / denom) * 100000.0) / 100000.0;
+        return list;
 //        return Math.round(ANS * 100000.0) / 100000.0;
-        return ANS;
+//        return ANS;
 }
 
 

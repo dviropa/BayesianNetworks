@@ -1,37 +1,29 @@
 import java.io.*;
 import java.util.*;
-public class Main {
-    public static void main(String[] args) throws IOException {
-//        String inputfile = "inputf.txt";
-////        String question = "P(B=T|J=T,M=T)";
-////        String fileName = "alarm_net.xml";
-//        int methodNumber = 2; // 1 = Simple, 2 = VariableElimination, 3 = Algorithm3
-//
-//        StrategyHandler handler = new StrategyHandler(question, fileName);
-//        handler.setStrategyByNumber(methodNumber); // קובע איזו אסטרטגיה לרוץ
-//
-//        double result = handler.calc(); // מפעיל את האלגוריתם הרצוי
-//        System.out.println("Result: " + result);
-//        InferenceFileParser.ParsedFile parsed = InferenceFileParser.parseInferenceTasksFromFile("path/to/your/input.txt");
-//
-//        System.out.println("File name: " + parsed.fileName);
-//        for (InferenceFileParser.InferenceTask task : parsed.tasks) {
-//            System.out.println(task);
-//        }
 
+public class Ex1 {
+    public static void main(String[] args) throws IOException {
         String inputFile = "input.txt";
+        String outputFile = "output.txt";
 
         InferenceFileParser.ParsedFile parsed = InferenceFileParser.parseInferenceTasksFromFile(inputFile);
-        System.out.println("📂 File: " + parsed.fileName);
 
-        for (InferenceFileParser.InferenceTask task : parsed.tasks) {
-            StrategyHandler handler = new StrategyHandler(task.question, parsed.fileName);
-            handler.setStrategyByNumber(task.algorithmNumber);
-            double result = handler.calc();
-            System.out.println("📌 " + task.question + " using Algorithm " + task.algorithmNumber + " → Result: " + result);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
+            writer.write("📂 File: " + parsed.fileName + "\n");
+
+            for (InferenceFileParser.InferenceTask task : parsed.tasks) {
+                StrategyHandler handler = new StrategyHandler(task.question, parsed.fileName);
+                handler.setStrategyByNumber(task.algorithmNumber);
+                List<Double> result = handler.calc();
+
+                writer.write("📌 " + task.question + " using Algorithm " + task.algorithmNumber + " → Result: " + result + "\n");
+            }
+
+            System.out.println("✅ Results written to: " + outputFile);
         }
     }
-    public class InferenceFileParser {
+
+    public static class InferenceFileParser {
 
         public static class InferenceTask {
             public String question;
@@ -70,7 +62,6 @@ public class Main {
                 } else {
                     int algorithm = 4; // ברירת מחדל
 
-                    // בדיקה חכמה: אם יש בדיוק פסיק אחד (שחורץ בין שאלה למספר)
                     int lastComma = line.lastIndexOf(',');
                     if (lastComma != -1) {
                         String possibleNumber = line.substring(lastComma + 1).trim();
@@ -78,7 +69,6 @@ public class Main {
                             algorithm = Integer.parseInt(possibleNumber);
                             line = line.substring(0, lastComma); // חתוך את המספר מהשאלה
                         } catch (NumberFormatException ignored) {
-                            // אם זה לא מספר - נשאיר algorithm = 4
                         }
                     }
 
@@ -89,9 +79,5 @@ public class Main {
             reader.close();
             return parsed;
         }
-
     }
-
 }
-
-

@@ -1,7 +1,8 @@
-0.00004,0,4
-0.28417,7,32
-0.28417,7,16
-0.28417,7,16
-0.84902,15,64
-0.84902,7,12
-0.84902,5,8
+📂 File: alarm_net.xml
+📌 P(B=F,E=T,A=T,M=T,J=F) using Algorithm 4 → Result: [4.0559399999999997E-5, 5.0, 0.0]
+📌 P(B=T|J=T,M=T) using Algorithm 1 → Result: [0.28417, 60.0, 12.0]
+📌 P(B=T|J=T,M=T) using Algorithm 2 → Result: [0.28417, 176.0, 64.0]
+📌 P(B=T|J=T,M=T) using Algorithm 3 → Result: null
+📌 P(J=T|B=T) using Algorithm 1 → Result: [0.84902, 180.0, 36.0]
+📌 P(J=T|B=T) using Algorithm 2 → Result: [0.84902, 352.0, 256.0]
+📌 P(J=T|B=T) using Algorithm 3 → Result: null

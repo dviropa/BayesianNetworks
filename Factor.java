@@ -6,12 +6,15 @@ public class Factor {
     public List<Double> values = new ArrayList<>();
     public List<String> nams = new ArrayList<>();
     private String fileName;
+    public static int multCount = 0;
+    public static int addCount = 0;
 
     public Factor(List<Variable> scope, List<Double> values, List<String> nams, String fileName) {
         this.scope = scope;
         this.values = values;
         this.nams = nams;
         this.fileName = fileName;
+
     }
 
     public Factor(Factor f) {
@@ -19,6 +22,8 @@ public class Factor {
         this.values = new ArrayList<>(f.values);
         this.nams = new ArrayList<>(f.nams);
         this.fileName = f.fileName;
+
+
     }
 
     public Factor(CPT c, String fileName) {
@@ -31,6 +36,7 @@ public class Factor {
         }
         this.nams.add(c.variable.getName());
 //        System.out.println("cpt: " + c.toString());
+
     }
 
     public List<String> getnams() {
@@ -69,7 +75,7 @@ public class Factor {
         }
 
         // הדפסה לדיבאג
-//        System.out.println("❌ Combo not found: " + assignment);
+//        System.out.println(" Combo not found: " + assignment);
         return -1;
     }
 
@@ -77,7 +83,7 @@ public class Factor {
     public double getProbability(Map<String, String> assignment) {
         int index = getCombinationIndex(this.nams, assignment, fileName);
         if (index == -1) {
-//            System.out.println("❌ Combo not found: " + assignment);
+//            System.out.println(" Combo not found: " + assignment);
         }
         return this.values.get(index);
     }
@@ -124,6 +130,7 @@ public class Factor {
     }
 
     public Factor unione(Factor f2) {
+        multCount =0;
         List<Variable> newScope = new ArrayList<>();
         Set<String> names = new HashSet<>();
 
@@ -155,6 +162,8 @@ public class Factor {
             double v2 = (idx2 >= 0 && idx2 < f2.values.size()) ? f2.values.get(idx2) : 1.0;
 
             newValues.add(v1 * v2);
+            multCount ++;
+
         }
 
 //        System.out.println("[UNION] New scope: " + allVarNames);
@@ -174,6 +183,7 @@ public class Factor {
     }
 
     public Factor variable_Elimination(List<String> keepNames) {
+        addCount=0;
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         List<String> allNames = this.scope.stream().map(Variable::getName).collect(Collectors.toList());
         List<String> eliminateNames = allNames.stream().filter(name -> !keepNames.contains(name)).collect(Collectors.toList());
@@ -188,6 +198,7 @@ public class Factor {
                 fullAssignment.putAll(elimAssignment);
                 int index = getIndexFor(fullAssignment, this.nams, fileName);
                 sum += this.values.get(index);
+                addCount ++;
             }
             newValues.add(sum);
         }

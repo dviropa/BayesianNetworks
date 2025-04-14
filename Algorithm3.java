@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class Algorithm3 implements baceStrategy{
     private String question;
     private String fileName;
@@ -6,7 +8,7 @@ public class Algorithm3 implements baceStrategy{
         this.fileName = fileName;
     }
     @Override
-    public Double calc() {
-        return 0.0;
+    public List<Double> calc() {
+        return null;
     }
 }
