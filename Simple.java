@@ -18,6 +18,9 @@ public class Simple implements baceStrategy {
 
     @Override
     public List<Double> calc() {
+        multCount = 0;
+        addCount = 0;
+
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
 
         // חלק את השאלה ל-P(X=...|Y=...) → P(X,Y) / P(Y)

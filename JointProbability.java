@@ -15,6 +15,9 @@ public class JointProbability implements baceStrategy {
     }
     @Override
     public List<Double> calc() {
+        multCount = 0;
+        addCount = 0;
+
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         Map<String, String> assignment = baceStrategy.parseQuestion(question);
 
