@@ -16,10 +16,13 @@ public class Algorithm3 implements baceStrategy{
         String queryVar = q.keySet().iterator().next();
         List<String> evidenceVars = q.get(queryVar);
 
+        Map<String, String> allAssignments = baceStrategy.extractEvidence(question);
 
         List<Factor> factors = new ArrayList<>();
         for (Variable v : variableMap.values()) {
-            factors.add(new Factor(v.getCPT(),fileName));
+//            factors.add(new Factor(v.getCPT(),fileName));
+            factors.add(new Factor(v.getCPT(),fileName).restrict(allAssignments));
+
         }
         Factor finall = null;
 
@@ -35,27 +38,31 @@ public class Algorithm3 implements baceStrategy{
             }
 
 //        evidenceVars.add(queryVar);
-        Factor top=factors.get(0);
-//        Factor top=finall.variable_Elimination(evidenceVars);
+//        Factor top=factors.get(0);
+//        top.normalize();
+//        List<String> evidenceOnly = new ArrayList<>(evidenceVars);
+//        evidenceOnly.remove(queryVar);
+//        Factor buton=finall.variable_Elimination(evidenceOnly);
 //        multCount+=finall.multCount;
 //        addCount+=finall.addCount;
-        top.normalize();
-        List<String> evidenceOnly = new ArrayList<>(evidenceVars);
-        evidenceOnly.remove(queryVar);
-        Factor buton=finall.variable_Elimination(evidenceOnly);
+//        if(buton.getvarubels().size()>1){
+//            buton.normalize();
+//        }
+//        Map<String, String> topmap =queryToMap(question,fileName);
+//        Map<String, String> butonmap =queryToMap(question,fileName);
+//        butonmap.remove(queryVar);
+//        List<Double> list = new ArrayList<>();
+//        list.add(Math.round((top.getProbability(topmap) / buton.getProbability(butonmap)) * 100000.0) / 100000.0);
+//        list.add(multCount);
+//        list.add(addCount);
+        Factor f=finall.variable_Elimination(List.of(queryVar));
         multCount+=finall.multCount;
         addCount+=finall.addCount;
-        if(buton.getvarubels().size()>1){
-            buton.normalize();
-        }
-        Map<String, String> topmap =queryToMap(question,fileName);
-        Map<String, String> butonmap =queryToMap(question,fileName);
-        butonmap.remove(queryVar);
+        f.normalize();
         List<Double> list = new ArrayList<>();
-        list.add(Math.round((top.getProbability(topmap) / buton.getProbability(butonmap)) * 100000.0) / 100000.0);
+        list.add((double) Math.round(f.getProbability(baceStrategy.extractQueryAssignment(question)) * 100000.0) / 100000.0);
         list.add(multCount);
         list.add(addCount);
-
         return list;
     }
     private List<Factor> FactortoTemove(List<Factor> factors, List<String> evidenceVars) {

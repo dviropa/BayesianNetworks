@@ -208,4 +208,38 @@ public class Factor {
 //        System.out.println("[ELIMINATION] Resulting values: " + newValues);
         return new Factor(newScope, newValues, keepNames, fileName);
     }
+    public Factor restrict(Map<String, String> restrictions) {
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
+
+        // משתנים חדשים - אחרי הסרת המשתנים שהוצבו
+        List<Variable> newScope = new ArrayList<>();
+        List<String> newNams = new ArrayList<>();
+
+        for (Variable v : scope) {
+            if (!restrictions.containsKey(v.getName())) {
+                newScope.add(v);
+                newNams.add(v.getName());
+            }
+        }
+
+        // כל הצירופים האפשריים של המשתנים החדשים
+        List<Map<String, String>> combinations = generateOutcomeCombinations(variableMap, newNams);
+
+        List<Double> newValues = new ArrayList<>();
+
+        for (Map<String, String> partialAssign : combinations) {
+            // מצרף את ההגבלות (ההשמות) למיפוי הנוכחי
+            Map<String, String> fullAssign = new HashMap<>(partialAssign);
+            fullAssign.putAll(restrictions);
+
+            int index = getIndexFor(fullAssign, this.nams, fileName);
+            if (index != -1) {
+                newValues.add(this.values.get(index));
+            }
+        }
+
+        return new Factor(newScope, newValues, newNams, fileName);
+    }
+
+
 }

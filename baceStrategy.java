@@ -110,6 +110,53 @@ public interface baceStrategy {
 
         return result;
     }
+    public static Map<String, String> extractQueryAssignment(String question) {
+        Map<String, String> result = new HashMap<>();
+
+        if (!question.contains("|")) {
+            // שאלה לא מותנית
+            String inside = question.substring(2, question.length() - 1);
+            String[] assignments = inside.split(",");
+            for (String part : assignments) {
+                String[] split = part.split("=");
+                result.put(split[0].trim(), split[1].trim());
+            }
+        } else {
+            // שאלה מותנית: P(X=... | Y=..., Z=...)
+            String inside = question.substring(2, question.length() - 1);
+            String[] parts = inside.split("\\|");
+            String[] queryAssignments = parts[0].trim().split(",");
+            for (String part : queryAssignments) {
+                String[] split = part.split("=");
+                result.put(split[0].trim(), split[1].trim());
+            }
+        }
+
+        return result;
+    }
+
+    public static Map<String, String> extractEvidence(String question) {
+        Map<String, String> evidenceMap = new LinkedHashMap<>();
+
+        if (!question.contains("|")) {
+            return evidenceMap; // אין evidence
+        }
+
+        String[] parts = question.substring(2, question.length() - 1).split("\\|");
+        if (parts.length < 2) return evidenceMap;
+
+        String evidencePart = parts[1].trim(); // לדוגמה: "J=T,M=T"
+        String[] assignments = evidencePart.split(",");
+
+        for (String assign : assignments) {
+            if (assign.contains("=")) {
+                String[] kv = assign.split("=");
+                evidenceMap.put(kv[0].trim(), kv[1].trim());
+            }
+        }
+
+        return evidenceMap;
+    }
 
 
 }
