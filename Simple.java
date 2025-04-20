@@ -84,18 +84,33 @@ public class Simple implements baceStrategy {
 //            multCount += jp.multCount;
             String s=containskey(q.toString());
             if(s!=null) {
-                sum += calcMap.get(s);
-
+                if(sum==0) {
+                    sum += calcMap.get(s);
+                }
+                else {
+                    sum += calcMap.get(s);
+//                    addCount++;
+                }
 
             }
             else {
                 JointProbability jp = new JointProbability(q.toString(), fileName,calcMap);
                 double ans=jp.calc().get(0);
-                sum += ans;
-                calcMap.put(q.toString(), ans);
-                addCount++;
-                addCount += jp.addCount;
-                multCount += jp.multCount;
+                if(sum==0) {
+                    sum += ans;
+                    calcMap.put(q.toString(), ans);
+                    addCount += jp.addCount;
+                    multCount += jp.multCount;
+                }
+                else {
+                    sum += ans;
+                    calcMap.put(q.toString(), ans);
+                    addCount++;
+                    addCount += jp.addCount;
+                    multCount += jp.multCount;
+
+                }
+
             }
         }
 
@@ -155,9 +170,6 @@ public class Simple implements baceStrategy {
         System.out.println("Result: " + s.calc());
         System.out.println("addCount: " + addCount);
         System.out.println("multCount: " + multCount);
-
-
-
 
     }
 }

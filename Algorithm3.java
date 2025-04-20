@@ -22,8 +22,10 @@ public class Algorithm3 implements baceStrategy{
         for (Variable v : variableMap.values()) {
 //            factors.add(new Factor(v.getCPT(),fileName));
             factors.add(new Factor(v.getCPT(),fileName).restrict(allAssignments));
+            //בדיקה אם הוא כל מה שמחפשים
 
         }
+        //
         Factor finall = null;
 
             while (factors.size() > 0) {

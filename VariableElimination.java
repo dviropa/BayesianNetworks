@@ -5,16 +5,110 @@ public class VariableElimination implements baceStrategy {
     private String fileName;
     public static double multCount = 0;
     public static double addCount = 0;
+    public static int  multC = 0;
+    public static int addC = 0;
 
     public VariableElimination(String question, String fileName) {
         this.question = question;
         this.fileName = fileName;
     }
+    private String getMinNameAlphabetically(List<Factor> factors, String queryVar) {
+        String minName = null;
+        for (Factor factor : factors) {
+            for (String name : factor.getnams()) {
+                if (minName == null || (int)(name.charAt(0)) < (int)(minName.charAt(0))) {
+                    if(!queryVar.equals(name)) minName = name;
+                }
+            }
+        }
+        return minName;
+    }
+    private List<Factor> getFactorscontiningminchar(String minName,List<Factor> factors) {
+        List<Factor> finale = new ArrayList<>();
+        for (Factor factor : factors) {
+            if (factor.getnams().contains(minName)) {
+                finale.add(factor);
+            }
+        }
+        return finale;
+    }
+    private List<Factor> sortFactorsByVariableCount(List<Factor> factors) {
+        return factors.stream()
+                .sorted(Comparator.comparingInt(f -> f.getvarubels().size()))
+                .collect(Collectors.toList());
+    }
+    private Factor eliminateAllVariables(List<Factor> factors,String queryVar) {
+        Factor finalFactor=null;
+        while (factors.size() > 1) {
+            Factor merged=null;
+            String charToRemove = getMinNameAlphabetically(factors,queryVar);
+            if (charToRemove==null) {
+                List<Factor> factorsWithChar = getFactorscontiningminchar(queryVar, factors);
+                while (factorsWithChar.size() > 1) {
 
+                    // מיין לפי מספר משתנים
+                    List<Factor> sorted = sortFactorsByVariableCount(factorsWithChar);
+
+                    Factor f1 = sorted.get(0);
+                    Factor f2 = sorted.get(1);
+
+                    merged = f1.unione(f2);
+                    multCount+=f1.multCount;
+                    multC += merged.values.size();
+                    factorsWithChar.remove(f1);
+                    factorsWithChar.remove(f2);
+                    factorsWithChar.add(merged);
+                    factors.remove(f1);
+                    factors.remove(f2);
+                    factors.add(merged);
+                }
+                return merged;
+            }
+            List<Factor> factorsWithChar = getFactorscontiningminchar(charToRemove, factors);
+
+            while (factorsWithChar.size() > 1) {
+                // מיין לפי מספר משתנים
+                List<Factor> sorted = sortFactorsByVariableCount(factorsWithChar);
+
+                Factor f1 = sorted.get(0);
+                Factor f2 = sorted.get(1);
+
+                merged = f1.unione(f2);
+                multC += merged.values.size();
+
+                multCount+=f1.multCount;
+
+                factorsWithChar.remove(f1);
+                factorsWithChar.remove(f2);
+                factorsWithChar.add(merged);
+                factors.remove(f1);
+                factors.remove(f2);
+                factors.add(merged);
+            }
+            factors.remove(merged);
+            merged=factorsWithChar.get(0);
+
+            int addtemp=merged.values.size();
+
+             finalFactor = merged.variable_Elimination(
+                    factorsWithChar.get(0).getnams().stream()
+                            .filter(name -> !name.equals(charToRemove))
+                            .collect(Collectors.toList())
+            );
+
+            addC += addtemp-merged.values.size();
+            addCount+=merged.addCount;
+            factors.add(finalFactor);
+
+
+        }
+        return finalFactor;
+    }
     @Override
     public List<Double> calc() {
         multCount = 0;
         addCount = 0;
+
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         Map<String, List<String>> q = baceStrategy.questionsToMap(question);
         String queryVar = q.keySet().iterator().next();
@@ -32,9 +126,9 @@ public class VariableElimination implements baceStrategy {
         List<Factor> factors = new ArrayList<>();
         for (Variable v : variableMap.values()) {
             chek = true;
-//            factors.add(new Factor(v.getCPT(),fileName));
             Factor t=new Factor(v.getCPT(),fileName).restrict(allAssignments);
-            factors.add(t);
+            if(!(t.getvalues().size()==1||t.getvalues().size()==0)) factors.add(t);
+
             Factor t1=new Factor(v.getCPT(),fileName);
             if(t1.nams.size()==baceStrategy.extractEvidence(question).size()+baceStrategy.extractQueryAssignment(question).size()) {
 
@@ -48,79 +142,151 @@ public class VariableElimination implements baceStrategy {
                     List<String> keys = new ArrayList<>(all.keySet());
                     t1=t1.variable_Elimination(keys);//הוספה של שאר משתנה השאלה
                     multCount+=t1.multCount;
-                    addCount+=t1.addCount;                List<Double> list = new ArrayList<>();
+                    addCount+=t1.addCount;
+                    List<Double> list = new ArrayList<>();
                     list.add((double) Math.round((t1.getProbability(baceStrategy.extractQueryAssignment(question))) * 100000.0) / 100000.0);
                     list.add(multCount);
-                    list.add(addCount);
+                    list.add(addCount-1);
                     return list;
                 }
             }
-
-//            t.restrict(allAssignments);
-//            factors.add(t);
         }
+        Factor finall =eliminateAllVariables(factors,queryVar);
 
+//        Factor f=finall.variable_Elimination(List.of(queryVar));
+//        multCount+=finall.multCount;
+//        addCount+=finall.addCount;
 
-        Factor finall = null;
-        while (factors.size() > 0) {
-            Factor smaller=factors.get(0);
-            int l=0;
-            int c=0;
-            while (factors.size() > l) {
-                int t=compareFactorsAlphabetically(smaller, factors.get(l));
-                if(!(t < 0)){
-                    smaller=factors.get(l);
-                    c=l;
-                }
-                l++;
-            }
-            factors.remove(c);
-            if(finall==null){
-                finall=smaller;
-            }
-            else {
-                finall=finall.unione(smaller);
-                multCount+=finall.multCount;
-                addCount+=finall.addCount;
-
-
-
-            }
-        }
-        /// ///////////
-        Factor f=finall.variable_Elimination(List.of(queryVar));
-        multCount+=finall.multCount;
+        finall.normalize();
+        addC += finall.values.size();
         addCount+=finall.addCount;
-        f.normalize();
         List<Double> list = new ArrayList<>();
-        list.add((double) Math.round(f.getProbability(baceStrategy.extractQueryAssignment(question)) * 100000.0) / 100000.0);
+        list.add((double) Math.round(finall.getProbability(baceStrategy.extractQueryAssignment(question)) * 100000.0) / 100000.0);
         list.add(multCount);
         list.add(addCount);
-        /// ///////////
-
-//        evidenceVars.add(queryVar);
-//        Factor top=finall.variable_Elimination(evidenceVars);
-//        multCount+=finall.multCount;
-//        addCount+=finall.addCount;
-//        top.normalize();
-//        List<String> evidenceOnly = new ArrayList<>(evidenceVars);
-//        evidenceOnly.remove(queryVar);
-//        Factor buton=finall.variable_Elimination(evidenceOnly);
-//        multCount+=finall.multCount;
-//        addCount+=finall.addCount;
-//        if(buton.getvarubels().size()>1){
-//            buton.normalize();
+        System.out.println("addCount: " + addC);
+        System.out.println("multCount: " + multC);
+        return list;
+    }
+//    @Override
+//    public List<Double> calc() {
+//        multCount = 0;
+//        addCount = 0;
+//       int  multC = 0;
+//        int addC = 0;
+//        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
+//        Map<String, List<String>> q = baceStrategy.questionsToMap(question);
+//        String queryVar = q.keySet().iterator().next();
+//        List<String> evidenceVars = q.get(queryVar);
+//
+//
+//        Map<String, String> evidence = baceStrategy.extractEvidence(question);
+//        Map<String, String> queryAssign = baceStrategy.extractQueryAssignment(question);
+//        Map<String, String> all = new HashMap<>(evidence);
+//        all.putAll(queryAssign);
+//
+//
+//        Map<String, String> allAssignments = baceStrategy.extractEvidence(question);
+//        boolean chek = true;
+//        List<Factor> factors = new ArrayList<>();
+//        for (Variable v : variableMap.values()) {
+//            chek = true;
+////            factors.add(new Factor(v.getCPT(),fileName));
+//            Factor t=new Factor(v.getCPT(),fileName).restrict(allAssignments);
+//            factors.add(t);
+//            Factor t1=new Factor(v.getCPT(),fileName);
+//            if(t1.nams.size()==baceStrategy.extractEvidence(question).size()+baceStrategy.extractQueryAssignment(question).size()) {
+//
+//                for (String s : all.keySet()) {
+//                    if (!t1.nams.contains(s) ) {
+//                        chek = false;
+//                        break;
+//                    }
+//                }
+//                if(chek){
+//                    List<String> keys = new ArrayList<>(all.keySet());
+//                    t1=t1.variable_Elimination(keys);//הוספה של שאר משתנה השאלה
+//                    multCount+=t1.multCount;
+//                    addCount+=t1.addCount;                List<Double> list = new ArrayList<>();
+//                    list.add((double) Math.round((t1.getProbability(baceStrategy.extractQueryAssignment(question))) * 100000.0) / 100000.0);
+//                    list.add(multCount);
+//                    list.add(addCount);
+//                    return list;
+//                }
+//            }
+//
+////            t.restrict(allAssignments);
+////            factors.add(t);
 //        }
-//        Map<String, String> topmap =queryToMap(question,fileName);
-//        Map<String, String> butonmap =queryToMap(question,fileName);
-//        butonmap.remove(queryVar);
+//
+//
+//        Factor finall = null;
+//        while (factors.size() > 0) {
+//            Factor smaller=factors.get(0);
+//            int l=0;
+//            int c=0;
+//            while (factors.size() > l) {
+//
+//
+//                int t=compareFactorsAlphabetically(smaller, factors.get(l));
+//                if(!(t < 0)){
+//                    smaller=factors.get(l);
+//                    c=l;
+//                }
+//                l++;
+//            }
+//            factors.remove(c);
+//            if(finall==null){
+//                finall=smaller;
+//            }
+//            else {
+//                finall=finall.unione(smaller);
+//                multC += finall.values.size();
+//                multCount+=finall.multCount;
+//                addCount+=finall.addCount;
+//
+//
+//
+//            }
+//        }
+//        /// ///////////
+//        int addtemp=finall.values.size();
+//        Factor f=finall.variable_Elimination(List.of(queryVar));
+//        addC += addtemp-f.values.size();
+//        multCount+=finall.multCount;
+//        addCount+=finall.addCount;
+//        f.normalize();
+//        addC += f.values.size()-1;
 //        List<Double> list = new ArrayList<>();
-//        list.add(Math.round((top.getProbability(topmap) / buton.getProbability(butonmap)) * 100000.0) / 100000.0);
+//        list.add((double) Math.round(f.getProbability(baceStrategy.extractQueryAssignment(question)) * 100000.0) / 100000.0);
 //        list.add(multCount);
 //        list.add(addCount);
-
-return list;
-    }
+//        /// ///////////
+//
+////        evidenceVars.add(queryVar);
+////        Factor top=finall.variable_Elimination(evidenceVars);
+////        multCount+=finall.multCount;
+////        addCount+=finall.addCount;
+////        top.normalize();
+////        List<String> evidenceOnly = new ArrayList<>(evidenceVars);
+////        evidenceOnly.remove(queryVar);
+////        Factor buton=finall.variable_Elimination(evidenceOnly);
+////        multCount+=finall.multCount;
+////        addCount+=finall.addCount;
+////        if(buton.getvarubels().size()>1){
+////            buton.normalize();
+////        }
+////        Map<String, String> topmap =queryToMap(question,fileName);
+////        Map<String, String> butonmap =queryToMap(question,fileName);
+////        butonmap.remove(queryVar);
+////        List<Double> list = new ArrayList<>();
+////        list.add(Math.round((top.getProbability(topmap) / buton.getProbability(butonmap)) * 100000.0) / 100000.0);
+////        list.add(multCount);
+////        list.add(addCount);
+//        System.out.println("addCount: " + addC);
+//        System.out.println("multCount: " + multC);
+//return list;
+//    }
     private int compareFactorsAlphabetically(Factor f1, Factor f2) {
         // קבל את רשימת שמות המשתנים של כל פקטור
         List<String> names1 = f1.getvarubels().stream().map(Variable::getName).sorted().toList();
@@ -162,10 +328,10 @@ return list;
         System.out.println("Result: " + s.calc());
         System.out.println(s.multCount);
         System.out.println(s.addCount);
-        VariableElimination s1 = new VariableElimination("P(B0=v1|A1=T)", "big_net.xml");
-        System.out.println("Result: " + s1.calc());
-        System.out.println("addCount: " + addCount);
-        System.out.println("multCount: " + multCount);
+//        VariableElimination s1 = new VariableElimination("P(B0=v1|A1=T)", "big_net.xml");
+//        System.out.println("Result: " + s1.calc());
+//        System.out.println("addCount: " + addCount);
+//        System.out.println("multCount: " + multCount);
     }
 
 

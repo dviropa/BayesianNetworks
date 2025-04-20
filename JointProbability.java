@@ -47,8 +47,14 @@ public class JointProbability implements baceStrategy {
 //                ANS *= calcMap.get(var+"="+valStr);
 //            }
             double prob = variable.getCPT().getProb(valStr, parentVals);
-            ANS *= prob;
-            multCount++;
+            if(ANS==1){
+                ANS = prob;
+            }
+            else {
+                ANS *= prob;
+                multCount++;
+            }
+
         }
         List<Double> list = new ArrayList<>();
         list.add(ANS);

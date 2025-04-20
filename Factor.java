@@ -9,6 +9,7 @@ public class Factor {
     public static int multCount = 0;
     public static int addCount = 0;
 
+
     public Factor(List<Variable> scope, List<Double> values, List<String> nams, String fileName) {
         this.scope = scope;
         this.values = values;
@@ -130,7 +131,8 @@ public class Factor {
     }
 
     public Factor unione(Factor f2) {
-        multCount =0;
+        multCount = 0;
+        addCount = 0;
         List<Variable> newScope = new ArrayList<>();
         Set<String> names = new HashSet<>();
 
@@ -154,10 +156,6 @@ public class Factor {
             int idx1 = getIndexFor(combo, this.nams, fileName);
             int idx2 = getIndexFor(combo, f2.nams, fileName);
 
-            if (idx1 == -1 || idx2 == -1) {
-//                System.out.println("❌ Combo not found: " + combo + "\n  idx1: " + idx1 + " | idx2: " + idx2);
-            }
-
             double v1 = (idx1 >= 0 && idx1 < this.values.size()) ? this.values.get(idx1) : 1.0;
             double v2 = (idx2 >= 0 && idx2 < f2.values.size()) ? f2.values.get(idx2) : 1.0;
 
@@ -173,17 +171,22 @@ public class Factor {
     }
 
     public void normalize() {
+        multCount = 0;
+        addCount = 0;
         double sum = values.stream().mapToDouble(Double::doubleValue).sum();
+
         if (sum == 0) {
             throw new IllegalStateException("Cannot normalize with total sum 0.");
         }
         for (int i = 0; i < values.size(); i++) {
             values.set(i, values.get(i) / sum);
         }
+        addCount+=values.size()-1;
     }
 
     public Factor variable_Elimination(List<String> keepNames) {
-        addCount=0;
+        multCount = 0;
+        addCount = 0;
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         List<String> allNames = this.scope.stream().map(Variable::getName).collect(Collectors.toList());
         List<String> eliminateNames = allNames.stream().filter(name -> !keepNames.contains(name)).collect(Collectors.toList());
