@@ -9,15 +9,18 @@ public class Simple implements baceStrategy {
 
     public static double multCount = 0;
     public static double addCount = 0;
+    private Map<String, Double> calcMap=new HashMap<>();
 
 
-    public Simple(String question, String fileName) {
+    public Simple(String question, String fileName,Map<String, Double> calcMap) {
         this.question = question;
         this.fileName = fileName;
+        this.calcMap = calcMap;
     }
 
     @Override
     public List<Double> calc() {
+        Map<String, Double> calcMap=new HashMap<>();
         multCount = 0;
         addCount = 0;
 
@@ -45,8 +48,8 @@ public class Simple implements baceStrategy {
 //        return Math.round((num / denom) * 100000.0) / 100000.0;
         return list;
     }
-
     private double sumOverCombinations(Map<String, Variable> variableMap, Map<String, String> known) {
+        // מציאת משתנים חסרים
         List<String> missing = new ArrayList<>();
         for (String var : variableMap.keySet()) {
             if (!known.containsKey(var)) {
@@ -54,16 +57,17 @@ public class Simple implements baceStrategy {
             }
         }
 
-        int total = (int) Math.pow(2, missing.size());
-        double sum = 0.0;
-        JointProbability jp;
-        for (int i = 0; i < total; i++) {
-            Map<String, String> fullAssign = new HashMap<>(known);
-            for (int j = 0; j < missing.size(); j++) {
-                String val = ((i >> j) & 1) == 1 ? "T" : "F";
-                fullAssign.put(missing.get(j), val);
-            }
+        // יצירת כל ההשלמות האפשריות לערכים החסרים
+        List<Map<String, String>> allCombinations = Factor.generateOutcomeCombinations(variableMap, missing);
 
+        double sum = 0.0;
+
+        for (Map<String, String> partial : allCombinations) {
+            // שילוב עם known
+            Map<String, String> fullAssign = new HashMap<>(known);
+            fullAssign.putAll(partial);
+
+            // בניית השאלה מחדש
             StringBuilder q = new StringBuilder("P(");
             boolean first = true;
             for (Map.Entry<String, String> entry : fullAssign.entrySet()) {
@@ -73,18 +77,81 @@ public class Simple implements baceStrategy {
             }
             q.append(")");
 
-            jp = new JointProbability(q.toString(), fileName);
-            sum += jp.calc().get(0);
-            addCount++;
-            addCount+=jp.addCount;
-            multCount+=jp.multCount;
+//            JointProbability jp = new JointProbability(q.toString(), fileName,calcMap);
+//            sum += jp.calc().get(0);
+//            addCount++;
+//            addCount += jp.addCount;
+//            multCount += jp.multCount;
+            String s=containskey(q.toString());
+            if(s!=null) {
+                sum += calcMap.get(s);
+
+
+            }
+            else {
+                JointProbability jp = new JointProbability(q.toString(), fileName,calcMap);
+                double ans=jp.calc().get(0);
+                sum += ans;
+                calcMap.put(q.toString(), ans);
+                addCount++;
+                addCount += jp.addCount;
+                multCount += jp.multCount;
+            }
         }
 
         return sum;
     }
+    private String containskey(String var) {
+        for (String key : calcMap.keySet()) {
+            Map<String, String>vartemp=baceStrategy.parseQuestion(var);
+            Map<String, String>temp= baceStrategy.parseQuestion(key);
+            if(temp.equals(vartemp)){
+                return key;
+            }
+        }
+        return null;
+    }
+
+//    private double sumOverCombinations(Map<String, Variable> variableMap, Map<String, String> known) {
+//        List<String> missing = new ArrayList<>();
+//        for (String var : variableMap.keySet()) {
+//            if (!known.containsKey(var)) {
+//                missing.add(var);
+//            }
+//        }
+//
+//        int total = (int) Math.pow(2, missing.size());
+//        double sum = 0.0;
+//        JointProbability jp;
+//        for (int i = 0; i < total; i++) {
+//            Map<String, String> fullAssign = new HashMap<>(known);
+//            for (int j = 0; j < missing.size(); j++) {
+//                String val = ((i >> j) & 1) == 1 ? "T" : "F";
+//                fullAssign.put(missing.get(j), val);
+//            }
+//
+//            StringBuilder q = new StringBuilder("P(");
+//            boolean first = true;
+//            for (Map.Entry<String, String> entry : fullAssign.entrySet()) {
+//                if (!first) q.append(",");
+//                q.append(entry.getKey()).append("=").append(entry.getValue());
+//                first = false;
+//            }
+//            q.append(")");
+//
+//            jp = new JointProbability(q.toString(), fileName);
+//            sum += jp.calc().get(0);
+//            addCount++;
+//            addCount+=jp.addCount;
+//            multCount+=jp.multCount;
+//        }
+//
+//        return sum;
+//    }
 
     public static void main(String[] args) {
-        Simple s = new Simple("P(B=T|J=T,M=T)", "alarm_net.xml");
+        Map<String, Double> calcMap= new HashMap<>();
+        Simple s = new Simple("P(B=T|J=T,M=T)", "alarm_net.xml",calcMap);
         System.out.println("Result: " + s.calc());
         System.out.println("addCount: " + addCount);
         System.out.println("multCount: " + multCount);

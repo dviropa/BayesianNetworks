@@ -13,19 +13,54 @@ public class VariableElimination implements baceStrategy {
 
     @Override
     public List<Double> calc() {
+        multCount = 0;
+        addCount = 0;
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         Map<String, List<String>> q = baceStrategy.questionsToMap(question);
         String queryVar = q.keySet().iterator().next();
         List<String> evidenceVars = q.get(queryVar);
 
-        Map<String, String> allAssignments = baceStrategy.extractEvidence(question);
 
+        Map<String, String> evidence = baceStrategy.extractEvidence(question);
+        Map<String, String> queryAssign = baceStrategy.extractQueryAssignment(question);
+        Map<String, String> all = new HashMap<>(evidence);
+        all.putAll(queryAssign);
+
+
+        Map<String, String> allAssignments = baceStrategy.extractEvidence(question);
+        boolean chek = true;
         List<Factor> factors = new ArrayList<>();
         for (Variable v : variableMap.values()) {
+            chek = true;
 //            factors.add(new Factor(v.getCPT(),fileName));
-            factors.add(new Factor(v.getCPT(),fileName).restrict(allAssignments));
+            Factor t=new Factor(v.getCPT(),fileName).restrict(allAssignments);
+            factors.add(t);
+            Factor t1=new Factor(v.getCPT(),fileName);
+            if(t1.nams.size()==baceStrategy.extractEvidence(question).size()+baceStrategy.extractQueryAssignment(question).size()) {
 
+                for (String s : all.keySet()) {
+                    if (!t1.nams.contains(s) ) {
+                        chek = false;
+                        break;
+                    }
+                }
+                if(chek){
+                    List<String> keys = new ArrayList<>(all.keySet());
+                    t1=t1.variable_Elimination(keys);//הוספה של שאר משתנה השאלה
+                    multCount+=t1.multCount;
+                    addCount+=t1.addCount;                List<Double> list = new ArrayList<>();
+                    list.add((double) Math.round((t1.getProbability(baceStrategy.extractQueryAssignment(question))) * 100000.0) / 100000.0);
+                    list.add(multCount);
+                    list.add(addCount);
+                    return list;
+                }
+            }
+
+//            t.restrict(allAssignments);
+//            factors.add(t);
         }
+
+
         Factor finall = null;
         while (factors.size() > 0) {
             Factor smaller=factors.get(0);
@@ -127,6 +162,10 @@ return list;
         System.out.println("Result: " + s.calc());
         System.out.println(s.multCount);
         System.out.println(s.addCount);
+        VariableElimination s1 = new VariableElimination("P(B0=v1|A1=T)", "big_net.xml");
+        System.out.println("Result: " + s1.calc());
+        System.out.println("addCount: " + addCount);
+        System.out.println("multCount: " + multCount);
     }
 
 

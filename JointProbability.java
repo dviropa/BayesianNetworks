@@ -5,13 +5,15 @@ public class JointProbability implements baceStrategy {
     private String fileName;
     public static double multCount = 0;
     public static double addCount = 0;
+    private Map<String, Double> calcMap ;
 
 
-    public JointProbability(String question, String fileName) {
+    public JointProbability(String question, String fileName, Map<String, Double>calcMap) {
         this.question = question;
         this.fileName = fileName;
         multCount = 0;
         addCount = 0;
+        this.calcMap = calcMap;
     }
     @Override
     public List<Double> calc() {
@@ -33,7 +35,17 @@ public class JointProbability implements baceStrategy {
                 String parentVal = assignment.get(parent.getName());
                 parentVals.add(parentVal);
             }
-
+//            if(!calcMap.containsKey(var+"="+valStr)) {
+//                double prob = variable.getCPT().getProb(valStr, parentVals);
+//                if(prob !=1) {
+//                    ANS *= prob;
+//                    multCount++;
+//                }
+//                calcMap.put(var+"="+valStr, prob);
+//            }
+//            else {
+//                ANS *= calcMap.get(var+"="+valStr);
+//            }
             double prob = variable.getCPT().getProb(valStr, parentVals);
             ANS *= prob;
             multCount++;
@@ -52,7 +64,8 @@ public class JointProbability implements baceStrategy {
 
 
     public static void main(String[] args) {
-        JointProbability s = new JointProbability("P(B=F,E=T,A=T,M=T,J=F)", "alarm_net.xml");
+        Map<String, Double> calcMap =new HashMap<>();
+        JointProbability s = new JointProbability("P(B=F,E=T,A=T,M=T,J=F)", "alarm_net.xml",calcMap);
         System.out.println("Result: " + s.calc());
         System.out.println(multCount);
 
