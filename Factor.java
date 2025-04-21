@@ -97,6 +97,9 @@ public class Factor {
             if (combinations.get(i).equals(targetAssignment)) {
                 return i;
             }
+//            if (combinations.get(i).contain(targetAssignment)) {
+//                return i;
+//            }
         }
 
         return -1;
@@ -183,16 +186,27 @@ public class Factor {
         }
         addCount+=values.size()-1;
     }
-
     public Factor variable_Elimination(List<String> keepNames) {
+        // סינון משתנים שרלוונטיים לפאקטור
+        List<String> filteredKeepNames = keepNames.stream()
+                .filter(this.nams::contains)
+                .collect(Collectors.toList());
+
         multCount = 0;
         addCount = 0;
-        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
-        List<String> allNames = this.scope.stream().map(Variable::getName).collect(Collectors.toList());
-        List<String> eliminateNames = allNames.stream().filter(name -> !keepNames.contains(name)).collect(Collectors.toList());
-        List<Map<String, String>> keepCombinations = generateOutcomeCombinations(variableMap, keepNames);
 
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
+
+        // משתנים שצריך לאחד אותם (להעלים)
+        List<String> eliminateNames = this.scope.stream()
+                .map(Variable::getName)
+                .filter(name -> !filteredKeepNames.contains(name))
+                .collect(Collectors.toList());
+
+        // יוצרים את כל הקומבינציות עבור המשתנים שאותם נשמור
+        List<Map<String, String>> keepCombinations = generateOutcomeCombinations(variableMap, filteredKeepNames);
         List<Double> newValues = new ArrayList<>();
+
         for (Map<String, String> partialAssignment : keepCombinations) {
             double sum = 0.0;
             List<Map<String, String>> eliminateCombinations = generateOutcomeCombinations(variableMap, eliminateNames);
@@ -201,16 +215,51 @@ public class Factor {
                 fullAssignment.putAll(elimAssignment);
                 int index = getIndexFor(fullAssignment, this.nams, fileName);
                 sum += this.values.get(index);
-                addCount ++;
+                addCount++;
             }
             newValues.add(sum);
         }
 
-        List<Variable> newScope = this.scope.stream().filter(v -> keepNames.contains(v.getName())).collect(Collectors.toList());
-//        System.out.println("[ELIMINATION] Keep: " + keepNames + ", Eliminate: " + eliminateNames);
-//        System.out.println("[ELIMINATION] Resulting values: " + newValues);
-        return new Factor(newScope, newValues, keepNames, fileName);
+        // יוצרים את הסקופ החדש לאחר ההעלמה
+        List<Variable> newScope = this.scope.stream()
+                .filter(v -> filteredKeepNames.contains(v.getName()))
+                .collect(Collectors.toList());
+
+        return new Factor(newScope, newValues, filteredKeepNames, fileName);
     }
+
+//    public Factor variable_Elimination(List<String> keepNames) {
+//        List<String> filteredKeepNames = keepNames.stream()
+//                .filter(this.nams::contains)
+//                .collect(Collectors.toList());
+//        keepNames=filteredKeepNames;
+//
+//        multCount = 0;
+//        addCount = 0;
+//        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
+//        List<String> allNames = this.scope.stream().map(Variable::getName).collect(Collectors.toList());
+//        List<String> eliminateNames = allNames.stream().filter(name -> !keepNames.contains(name)).collect(Collectors.toList());
+//        List<Map<String, String>> keepCombinations = generateOutcomeCombinations(variableMap, keepNames);
+//
+//        List<Double> newValues = new ArrayList<>();
+//        for (Map<String, String> partialAssignment : keepCombinations) {
+//            double sum = 0.0;
+//            List<Map<String, String>> eliminateCombinations = generateOutcomeCombinations(variableMap, eliminateNames);
+//            for (Map<String, String> elimAssignment : eliminateCombinations) {
+//                Map<String, String> fullAssignment = new HashMap<>(partialAssignment);
+//                fullAssignment.putAll(elimAssignment);
+//                int index = getIndexFor(fullAssignment, this.nams, fileName);
+//                sum += this.values.get(index);
+//                addCount ++;
+//            }
+//            newValues.add(sum);
+//        }
+//
+//        List<Variable> newScope = this.scope.stream().filter(v -> keepNames.contains(v.getName())).collect(Collectors.toList());
+////        System.out.println("[ELIMINATION] Keep: " + keepNames + ", Eliminate: " + eliminateNames);
+////        System.out.println("[ELIMINATION] Resulting values: " + newValues);
+//        return new Factor(newScope, newValues, keepNames, fileName);
+//    }
     public Factor restrict(Map<String, String> restrictions) {
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
 

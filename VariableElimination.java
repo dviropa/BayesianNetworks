@@ -53,7 +53,7 @@ public class VariableElimination implements baceStrategy {
                     Factor f2 = sorted.get(1);
 
                     merged = f1.unione(f2);
-                    multCount+=f1.multCount;
+//                    multCount+=f1.multCount;
                     multC += merged.values.size();
                     factorsWithChar.remove(f1);
                     factorsWithChar.remove(f2);
@@ -76,7 +76,7 @@ public class VariableElimination implements baceStrategy {
                 merged = f1.unione(f2);
                 multC += merged.values.size();
 
-                multCount+=f1.multCount;
+//                multCount+=f1.multCount;
 
                 factorsWithChar.remove(f1);
                 factorsWithChar.remove(f2);
@@ -99,7 +99,7 @@ public class VariableElimination implements baceStrategy {
                                         .collect(Collectors.toList())
                         );
                         addC += addtemp-finalFactor.values.size();
-                        addCount+=merged.addCount;
+//                        addCount+=merged.addCount;
                         factors.add(finalFactor);
                         factorsWithChar.add(finalFactor);
                     }
@@ -132,8 +132,8 @@ public class VariableElimination implements baceStrategy {
     }
     @Override
     public List<Double> calc() {
-        multCount = 0;
-        addCount = 0;
+//        multCount = 0;
+//        addCount = 0;
 
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         Map<String, List<String>> q = baceStrategy.questionsToMap(question);
@@ -174,14 +174,19 @@ public class VariableElimination implements baceStrategy {
                     }
                 }
                 if(chek){
+                    t1=new Factor(v.getCPT(),fileName).restrict(allAssignments);
                     List<String> keys = new ArrayList<>(all.keySet());
+
+                    int addtemp=t1.values.size();
                     t1=t1.variable_Elimination(keys);//הוספה של שאר משתנה השאלה
-                    multCount+=t1.multCount;
-                    addCount+=t1.addCount;
+                    addC += addtemp-t1.values.size();
+
+//                    multCount+=t1.multCount;
+//                    addCount+=t1.addCount;
                     List<Double> list = new ArrayList<>();
                     list.add((double) Math.round((t1.getProbability(baceStrategy.extractQueryAssignment(question))) * 100000.0) / 100000.0);
-                    list.add(multCount);
-                    list.add(addCount-1);
+                    list.add(multC*1.0);
+                    list.add(addC*1.0);
                     return list;
                 }
             }
@@ -193,17 +198,16 @@ public class VariableElimination implements baceStrategy {
 
         finall=finall.variable_Elimination(List.of(queryVar));
         addC += addtemp-finall.values.size();
-        addCount+=finall.addCount;
+//        addCount+=finall.addCount;
 
         finall.normalize();
         addC += finall.values.size()-1;
-        addCount+=finall.addCount;
+//        addCount+=finall.addCount;
         List<Double> list = new ArrayList<>();
         list.add((double) Math.round(finall.getProbability(baceStrategy.extractQueryAssignment(question)) * 100000.0) / 100000.0);
-        list.add(multCount);
-        list.add(addCount);
-        System.out.println("addCount: " + addC);
-        System.out.println("multCount: " + multC);
+        list.add(multC*1.0);
+        list.add(addC*1.0);
+
         return list;
     }
 
@@ -394,10 +398,10 @@ public class VariableElimination implements baceStrategy {
         System.out.println("Result: " + s.calc());
         System.out.println(s.multCount);
         System.out.println(s.addCount);
-//        VariableElimination s1 = new VariableElimination("P(B0=v1|A1=T)", "big_net.xml");
-//        System.out.println("Result: " + s1.calc());
-//        System.out.println("addCount: " + addCount);
-//        System.out.println("multCount: " + multCount);
+        VariableElimination s1 = new VariableElimination("P(B0=v1|A1=T)", "big_net.xml");
+        System.out.println("Result: " + s1.calc());
+        System.out.println("addCount: " + addCount);
+        System.out.println("multCount: " + multCount);
     }
 
 
