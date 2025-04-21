@@ -84,21 +84,47 @@ public class VariableElimination implements baceStrategy {
                 factors.remove(f1);
                 factors.remove(f2);
                 factors.add(merged);
+
+
+                for (String s : merged.getnams()) {
+                    List<Factor> temp =getFactorscontiningminchar(s, factors);
+                    if(temp.size()==1&&!s.equals(queryVar)) {
+                        merged=temp.get(0);
+                        factors.remove(merged);
+                        factorsWithChar.remove(merged);
+                        int addtemp=merged.values.size();
+                        finalFactor = merged.variable_Elimination(
+                                merged.getnams().stream()
+                                        .filter(name -> !name.equals(s))
+                                        .collect(Collectors.toList())
+                        );
+                        addC += addtemp-finalFactor.values.size();
+                        addCount+=merged.addCount;
+                        factors.add(finalFactor);
+                        factorsWithChar.add(finalFactor);
+                    }
+                }
             }
-            factors.remove(merged);
-            merged=factorsWithChar.get(0);
-
-            int addtemp=merged.values.size();
-
-             finalFactor = merged.variable_Elimination(
-                    factorsWithChar.get(0).getnams().stream()
-                            .filter(name -> !name.equals(charToRemove))
-                            .collect(Collectors.toList())
-            );
-
-            addC += addtemp-merged.values.size();
-            addCount+=merged.addCount;
-            factors.add(finalFactor);
+            //            factors.remove(merged);
+//            merged=factorsWithChar.get(0);
+//            for (String s : merged.getnams()) {
+//                List<Factor> temp =getFactorscontiningminchar(s, factors);
+//                if(temp.size()==1&&!s.equals(queryVar)) {
+//                    merged=temp.get(0);
+//                    factors.remove(merged);
+//                    int addtemp=merged.values.size();
+//                    finalFactor = merged.variable_Elimination(factorsWithChar.get(0).getnams().stream().filter(name -> !name.equals(charToRemove)).collect(Collectors.toList()));
+//                    addC += addtemp-finalFactor.values.size();
+//                    addCount+=merged.addCount;
+//                    factors.add(finalFactor);
+//                }
+//            }
+//            factors.remove(merged);
+//            int addtemp=merged.values.size();
+//             finalFactor = merged.variable_Elimination(factorsWithChar.get(0).getnams().stream().filter(name -> !name.equals(charToRemove)).collect(Collectors.toList()));
+//            addC += addtemp-finalFactor.values.size();
+//            addCount+=merged.addCount;
+//            factors.add(finalFactor);
 
 
         }
@@ -124,10 +150,19 @@ public class VariableElimination implements baceStrategy {
         Map<String, String> allAssignments = baceStrategy.extractEvidence(question);
         boolean chek = true;
         List<Factor> factors = new ArrayList<>();
+
+        List<String> factorNames =getAllRelevantVariables(question);
+
         for (Variable v : variableMap.values()) {
             chek = true;
             Factor t=new Factor(v.getCPT(),fileName).restrict(allAssignments);
-            if(!(t.getvalues().size()==1||t.getvalues().size()==0)) factors.add(t);
+            if(!(t.getvalues().size()==1||t.getvalues().size()==0)){
+                if(factorNames.contains(v.getName())){
+                    factors.add(t);
+                }
+            }
+
+
 
             Factor t1=new Factor(v.getCPT(),fileName);
             if(t1.nams.size()==baceStrategy.extractEvidence(question).size()+baceStrategy.extractQueryAssignment(question).size()) {
@@ -153,12 +188,15 @@ public class VariableElimination implements baceStrategy {
         }
         Factor finall =eliminateAllVariables(factors,queryVar);
 
-//        Factor f=finall.variable_Elimination(List.of(queryVar));
-//        multCount+=finall.multCount;
-//        addCount+=finall.addCount;
+
+        int addtemp=finall.values.size();
+
+        finall=finall.variable_Elimination(List.of(queryVar));
+        addC += addtemp-finall.values.size();
+        addCount+=finall.addCount;
 
         finall.normalize();
-        addC += finall.values.size();
+        addC += finall.values.size()-1;
         addCount+=finall.addCount;
         List<Double> list = new ArrayList<>();
         list.add((double) Math.round(finall.getProbability(baceStrategy.extractQueryAssignment(question)) * 100000.0) / 100000.0);
@@ -168,6 +206,34 @@ public class VariableElimination implements baceStrategy {
         System.out.println("multCount: " + multC);
         return list;
     }
+
+
+
+    private List<String> getAllRelevantVariables(String question) {
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
+        Set<String> relevant = new HashSet<>();
+        Queue<String> queue = new LinkedList<>();
+
+        // הוסף את משתנה השאילתה ואת משתני העדויות
+        queue.add(baceStrategy.getQueryVariable(question));
+        queue.addAll(baceStrategy.extractEvidence(question).keySet());
+
+        while (!queue.isEmpty()) {
+            String var = queue.poll();
+            if (relevant.add(var)) { // מוסיף אם עדיין לא היה
+                Variable v = variableMap.get(var);
+                if (v != null) {
+                    for (Variable parent : v.getParents()) {
+                        queue.add(parent.getName());
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(relevant);
+    }
+
+
 //    @Override
 //    public List<Double> calc() {
 //        multCount = 0;
@@ -323,7 +389,7 @@ public class VariableElimination implements baceStrategy {
 
 
     public static void main(String[] args) {
-        VariableElimination s = new VariableElimination("P(B=T|J=T,M=T)", "alarm_net.xml");
+        VariableElimination s = new VariableElimination("P(J=T|B=T)", "alarm_net.xml");
 
         System.out.println("Result: " + s.calc());
         System.out.println(s.multCount);
