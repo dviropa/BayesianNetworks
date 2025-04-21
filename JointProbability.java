@@ -70,8 +70,13 @@ public class JointProbability implements baceStrategy {
 
 
     public static void main(String[] args) {
+//        Map<String, Double> calcMap =new HashMap<>();
+//        JointProbability s = new JointProbability("P(B=F,E=T,A=T,M=T,J=F)", "alarm_net.xml",calcMap);
+//        System.out.println("Result: " + s.calc());
+//        System.out.println(multCount);
+
         Map<String, Double> calcMap =new HashMap<>();
-        JointProbability s = new JointProbability("P(B=F,E=T,A=T,M=T,J=F)", "alarm_net.xml",calcMap);
+        JointProbability s = new JointProbability("P(A1=T,A2=F,A3=F,B0=v3,B1=F,B2=T,B3=F,C1=F,C2=v2,C3=F,D1=T)", "big_net.xml",calcMap);
         System.out.println("Result: " + s.calc());
         System.out.println(multCount);
 

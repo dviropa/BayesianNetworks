@@ -132,8 +132,8 @@ public class VariableElimination implements baceStrategy {
     }
     @Override
     public List<Double> calc() {
-//        multCount = 0;
-//        addCount = 0;
+        multC = 0;
+        addC = 0;
 
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
         Map<String, List<String>> q = baceStrategy.questionsToMap(question);
@@ -393,15 +393,13 @@ public class VariableElimination implements baceStrategy {
 
 
     public static void main(String[] args) {
-        VariableElimination s = new VariableElimination("P(J=T|B=T)", "alarm_net.xml");
+        VariableElimination s = new VariableElimination("P(B=T|J=T,M=T)", "alarm_net.xml");
 
         System.out.println("Result: " + s.calc());
-        System.out.println(s.multCount);
-        System.out.println(s.addCount);
+
         VariableElimination s1 = new VariableElimination("P(B0=v1|A1=T)", "big_net.xml");
         System.out.println("Result: " + s1.calc());
-        System.out.println("addCount: " + addCount);
-        System.out.println("multCount: " + multCount);
+
     }
 
 

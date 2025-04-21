@@ -75,10 +75,14 @@ public interface baceStrategy {
         for (int i = domainSizes.size() - 1; i >= 0; i--) {
             Variable currVar = (i < parents.size()) ? parents.get(i) : var;
             String value = orderedValues.get(i);
-            int valIndex = currVar.getValues().indexOf(value);
+            int valIndex = currVar.getOUTCOMES().indexOf(value);
+
+//            int valIndex = currVar.getValues().indexOf(value);
             if (valIndex == -1) {
-                throw new IllegalArgumentException("Value '" + value + "' not found in variable '" + currVar.getName() + "'");
-            }
+                valIndex = currVar.getOUTCOMES().indexOf(value.toLowerCase());
+                if (valIndex == -1) {
+                    throw new IllegalArgumentException("Value '" + value + "' not found in variable '" + currVar.getName() + "'");
+                }            }
 
             index += valIndex * multiplier;
             multiplier *= domainSizes.get(i);

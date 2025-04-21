@@ -35,12 +35,23 @@ public class Simple implements baceStrategy {
         // מונה - X ∪ Y
         Map<String, String> numerator = new HashMap<>(queryVars);
         numerator.putAll(evidenceVars);
+        for (Variable var : variableMap.values()) {
+            Factor f = new Factor(var.getCPT(), fileName);
+            List<String> factorVars = f.getnams();
 
+            if (factorVars.containsAll(numerator.keySet()) && numerator.keySet().containsAll(factorVars)) {
+                // אפשר פשוט להציב ולהחזיר תוצאה ישירה
+                double result = f.getProbability(numerator);
+                List<Double> list = new ArrayList<>();
+                list.add(Math.round(result * 100000.0) / 100000.0);
+                list.add(0.0); // אין פעולות
+                list.add(0.0);
+                return list;
+            }
+        }
         // מחשב מונה ומכנה על כל ההשלמות האפשריות
         double num = sumOverCombinations(variableMap, numerator);
-        System.out.println(num);
         double denom = sumOverCombinations(variableMap, evidenceVars);
-        System.out.println(denom);
         List<Double> list = new ArrayList<>();
         list.add(Math.round((num / denom) * 100000.0) / 100000.0);
         list.add(multCount);
@@ -166,7 +177,7 @@ public class Simple implements baceStrategy {
 
     public static void main(String[] args) {
         Map<String, Double> calcMap= new HashMap<>();
-        Simple s = new Simple("P(B=T|J=T,M=T)", "alarm_net.xml",calcMap);
+        Simple s = new Simple("P(B0=v1|A1=T)", "big_net.xml",calcMap);
         System.out.println("Result: " + s.calc());
         System.out.println("addCount: " + addCount);
         System.out.println("multCount: " + multCount);

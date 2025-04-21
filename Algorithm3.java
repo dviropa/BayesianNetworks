@@ -11,60 +11,61 @@ public class Algorithm3 implements baceStrategy{
     }
     @Override
     public List<Double> calc() {
-        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
-        Map<String, List<String>> q = baceStrategy.questionsToMap(question);
-        String queryVar = q.keySet().iterator().next();
-        List<String> evidenceVars = q.get(queryVar);
-
-        Map<String, String> allAssignments = baceStrategy.extractEvidence(question);
-
-        List<Factor> factors = new ArrayList<>();
-        for (Variable v : variableMap.values()) {
-//            factors.add(new Factor(v.getCPT(),fileName));
-            factors.add(new Factor(v.getCPT(),fileName).restrict(allAssignments));
-            //בדיקה אם הוא כל מה שמחפשים
-
-        }
-        //
-        Factor finall = null;
-
-            while (factors.size() > 0) {
-                factors = FactortoTemove(factors,evidenceVars);
-
-                if (factors.size() == 1) {
-                    finall = factors.get(0);
-                } else {
-                    multCount += finall.multCount;
-                    addCount += finall.addCount;
-                }
-            }
-
-//        evidenceVars.add(queryVar);
-//        Factor top=factors.get(0);
-//        top.normalize();
-//        List<String> evidenceOnly = new ArrayList<>(evidenceVars);
-//        evidenceOnly.remove(queryVar);
-//        Factor buton=finall.variable_Elimination(evidenceOnly);
+//        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
+//        Map<String, List<String>> q = baceStrategy.questionsToMap(question);
+//        String queryVar = q.keySet().iterator().next();
+//        List<String> evidenceVars = q.get(queryVar);
+//
+//        Map<String, String> allAssignments = baceStrategy.extractEvidence(question);
+//
+//        List<Factor> factors = new ArrayList<>();
+//        for (Variable v : variableMap.values()) {
+////            factors.add(new Factor(v.getCPT(),fileName));
+//            factors.add(new Factor(v.getCPT(),fileName).restrict(allAssignments));
+//            //בדיקה אם הוא כל מה שמחפשים
+//
+//        }
+//        //
+//        Factor finall = null;
+//
+//            while (factors.size() > 0) {
+//                factors = FactortoTemove(factors,evidenceVars);
+//
+//                if (factors.size() == 1) {
+//                    finall = factors.get(0);
+//                } else {
+//                    multCount += finall.multCount;
+//                    addCount += finall.addCount;
+//                }
+//            }
+//
+////        evidenceVars.add(queryVar);
+////        Factor top=factors.get(0);
+////        top.normalize();
+////        List<String> evidenceOnly = new ArrayList<>(evidenceVars);
+////        evidenceOnly.remove(queryVar);
+////        Factor buton=finall.variable_Elimination(evidenceOnly);
+////        multCount+=finall.multCount;
+////        addCount+=finall.addCount;
+////        if(buton.getvarubels().size()>1){
+////            buton.normalize();
+////        }
+////        Map<String, String> topmap =queryToMap(question,fileName);
+////        Map<String, String> butonmap =queryToMap(question,fileName);
+////        butonmap.remove(queryVar);
+////        List<Double> list = new ArrayList<>();
+////        list.add(Math.round((top.getProbability(topmap) / buton.getProbability(butonmap)) * 100000.0) / 100000.0);
+////        list.add(multCount);
+////        list.add(addCount);
+//        Factor f=finall.variable_Elimination(List.of(queryVar));
 //        multCount+=finall.multCount;
 //        addCount+=finall.addCount;
-//        if(buton.getvarubels().size()>1){
-//            buton.normalize();
-//        }
-//        Map<String, String> topmap =queryToMap(question,fileName);
-//        Map<String, String> butonmap =queryToMap(question,fileName);
-//        butonmap.remove(queryVar);
-//        List<Double> list = new ArrayList<>();
-//        list.add(Math.round((top.getProbability(topmap) / buton.getProbability(butonmap)) * 100000.0) / 100000.0);
-//        list.add(multCount);
-//        list.add(addCount);
-        Factor f=finall.variable_Elimination(List.of(queryVar));
-        multCount+=finall.multCount;
-        addCount+=finall.addCount;
-        f.normalize();
+//        f.normalize();
         List<Double> list = new ArrayList<>();
-        list.add((double) Math.round(f.getProbability(baceStrategy.extractQueryAssignment(question)) * 100000.0) / 100000.0);
-        list.add(multCount);
-        list.add(addCount);
+//        list.add((double) Math.round(f.getProbability(baceStrategy.extractQueryAssignment(question)) * 100000.0) / 100000.0);
+       list.add(0.0);
+        list.add(0.0);
+        list.add(0.0);
         return list;
     }
     private List<Factor> FactortoTemove(List<Factor> factors, List<String> evidenceVars) {
