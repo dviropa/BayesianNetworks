@@ -9,21 +9,17 @@ public class Ex1 {
         InferenceFileParser.ParsedFile parsed = InferenceFileParser.parseInferenceTasksFromFile(inputFile);
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile))) {
-            writer.write("📂 File: " + parsed.fileName + "\n");
-
             for (InferenceFileParser.InferenceTask task : parsed.tasks) {
                 StrategyHandler handler = new StrategyHandler(task.question, parsed.fileName);
                 handler.setStrategyByNumber(task.algorithmNumber);
                 List<Double> result = handler.calc();
-                if(result != null)
-
-                    System.out.println("📌 " + task.question + " using Algorithm " + task.algorithmNumber + " → Result: " + result.get(0)+","+result.get(1)+","+result.get(2) + "\n");
-                if(result != null)
-                    writer.write("📌 " + task.question + " using Algorithm " + task.algorithmNumber + " → Result: " + result.get(0)+","+result.get(1)+","+result.get(2) + "\n");
+                if (result != null) {
+//                    System.out.printf("%.5f,%.0f,%.0f%n", result.get(0), result.get(1), result.get(2));
+                    writer.write(String.format("%.5f,%.0f,%.0f%n", result.get(0), result.get(2), result.get(1)));
+                }
             }
-
-            System.out.println("✅ Results written to: " + outputFile);
         }
+
     }
 
     public static class InferenceFileParser {

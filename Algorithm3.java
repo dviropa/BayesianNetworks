@@ -1,209 +1,280 @@
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Algorithm3 implements baceStrategy{
     private String question;
     private String fileName;
-    public static double multCount = 0;
-    public static double addCount = 0;
+    public static double multC = 0;
+    public static double addC = 0;
     public Algorithm3(String question, String fileName) {
         this.question = question;
         this.fileName = fileName;
     }
-    @Override
-    public List<Double> calc() {
-//        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
-//        Map<String, List<String>> q = baceStrategy.questionsToMap(question);
-//        String queryVar = q.keySet().iterator().next();
-//        List<String> evidenceVars = q.get(queryVar);
-//
-//        Map<String, String> allAssignments = baceStrategy.extractEvidence(question);
-//
-//        List<Factor> factors = new ArrayList<>();
-//        for (Variable v : variableMap.values()) {
-////            factors.add(new Factor(v.getCPT(),fileName));
-//            factors.add(new Factor(v.getCPT(),fileName).restrict(allAssignments));
-//            //בדיקה אם הוא כל מה שמחפשים
-//
-//        }
-//        //
-//        Factor finall = null;
-//
-//            while (factors.size() > 0) {
-//                factors = FactortoTemove(factors,evidenceVars);
-//
-//                if (factors.size() == 1) {
-//                    finall = factors.get(0);
-//                } else {
-//                    multCount += finall.multCount;
-//                    addCount += finall.addCount;
+    private int countMultC(List<Factor> factors) {
+        int c = 0;
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName); // כדי לדעת את הערכים האפשריים לכל משתנה
+
+        List<Set<String>> nams = new ArrayList<>();
+        for (Factor factor : factors) {
+            nams.add(new HashSet<>(factor.getnams()));
+        }
+
+        while (nams.size() > 1) {
+            nams.sort(Comparator.comparing(Set::size));
+
+            Set<String> s = new HashSet<>(nams.get(1)); // נעתיק לפני שמאחדים
+            s.addAll(nams.get(0));
+
+            int c1 = 1;
+            for (String n : s) {
+                c1 *= variableMap.get(n).getValues().size(); // מספר הערכים האפשריים למשתנה
+            }
+
+            c += c1;
+
+            nams.remove(0);
+            nams.remove(0); // גם את המקורי של index 1, כי הוא זז להיות index 0
+            nams.add(s);
+        }
+
+        return c;
+    }
+
+    private String getMinNameAlphabetically(List<Factor> factors, String queryVar) {
+        int min=0;
+
+        String minName = null;
+        for (Factor factor : factors) {
+            for (String name : factor.getnams()) {
+                if (minName == null || countMultC(getFactorscontiningminchar( minName, factors))< min) {
+                    if(!queryVar.equals(name)){
+                        minName = name;
+                        min=countMultC(getFactorscontiningminchar( minName, factors));
+
+                    }
+                }
+            }
+        }
+        return minName;
+    }
+    private List<Factor> getFactorscontiningminchar(String minName,List<Factor> factors) {
+        List<Factor> finale = new ArrayList<>();
+        for (Factor factor : factors) {
+            if (factor.getnams().contains(minName)) {
+                finale.add(factor);
+            }
+        }
+        return finale;
+    }
+    private List<Factor> sortFactorsByVariableCount(List<Factor> factors) {
+        return factors.stream()
+                .sorted(Comparator.comparingInt(f -> f.getvarubels().size()))
+                .collect(Collectors.toList());
+    }
+    private Factor eliminateAllVariables(List<Factor> factors,String queryVar) {
+        Factor finalFactor=null;
+        while (factors.size() > 1) {
+            Factor merged=null;
+            String charToRemove = getMinNameAlphabetically(factors,queryVar);
+            if (charToRemove==null) {
+                List<Factor> factorsWithChar = getFactorscontiningminchar(queryVar, factors);
+                while (factorsWithChar.size() > 1) {
+
+                    // מיין לפי מספר משתנים
+                    List<Factor> sorted = sortFactorsByVariableCount(factorsWithChar);
+
+                    Factor f1 = sorted.get(0);
+                    Factor f2 = sorted.get(1);
+
+                    merged = f1.unione(f2);
+//                    multCount+=f1.multCount;
+                    multC += merged.values.size();
+                    factorsWithChar.remove(f1);
+                    factorsWithChar.remove(f2);
+                    factorsWithChar.add(merged);
+                    factors.remove(f1);
+                    factors.remove(f2);
+                    factors.add(merged);
+                }
+                return merged;
+            }
+            List<Factor> factorsWithChar = getFactorscontiningminchar(charToRemove, factors);
+
+            while (factorsWithChar.size() > 1) {
+                // מיין לפי מספר משתנים
+                List<Factor> sorted = sortFactorsByVariableCount(factorsWithChar);
+
+                Factor f1 = sorted.get(0);
+                Factor f2 = sorted.get(1);
+
+                merged = f1.unione(f2);
+                multC += merged.values.size();
+
+//                multCount+=f1.multCount;
+
+                factorsWithChar.remove(f1);
+                factorsWithChar.remove(f2);
+                factorsWithChar.add(merged);
+                factors.remove(f1);
+                factors.remove(f2);
+                factors.add(merged);
+
+
+                for (String s : merged.getnams()) {
+                    List<Factor> temp =getFactorscontiningminchar(s, factors);
+                    if(temp.size()==1&&!s.equals(queryVar)) {
+                        merged=temp.get(0);
+                        factors.remove(merged);
+                        factorsWithChar.remove(merged);
+                        int addtemp=merged.values.size();
+                        finalFactor = merged.variable_Elimination(
+                                merged.getnams().stream()
+                                        .filter(name -> !name.equals(s))
+                                        .collect(Collectors.toList())
+                        );
+                        addC += addtemp-finalFactor.values.size();
+//                        addCount+=merged.addCount;
+                        factors.add(finalFactor);
+                        factorsWithChar.add(finalFactor);
+                    }
+                }
+            }
+            //            factors.remove(merged);
+//            merged=factorsWithChar.get(0);
+//            for (String s : merged.getnams()) {
+//                List<Factor> temp =getFactorscontiningminchar(s, factors);
+//                if(temp.size()==1&&!s.equals(queryVar)) {
+//                    merged=temp.get(0);
+//                    factors.remove(merged);
+//                    int addtemp=merged.values.size();
+//                    finalFactor = merged.variable_Elimination(factorsWithChar.get(0).getnams().stream().filter(name -> !name.equals(charToRemove)).collect(Collectors.toList()));
+//                    addC += addtemp-finalFactor.values.size();
+//                    addCount+=merged.addCount;
+//                    factors.add(finalFactor);
 //                }
 //            }
-//
-////        evidenceVars.add(queryVar);
-////        Factor top=factors.get(0);
-////        top.normalize();
-////        List<String> evidenceOnly = new ArrayList<>(evidenceVars);
-////        evidenceOnly.remove(queryVar);
-////        Factor buton=finall.variable_Elimination(evidenceOnly);
-////        multCount+=finall.multCount;
-////        addCount+=finall.addCount;
-////        if(buton.getvarubels().size()>1){
-////            buton.normalize();
-////        }
-////        Map<String, String> topmap =queryToMap(question,fileName);
-////        Map<String, String> butonmap =queryToMap(question,fileName);
-////        butonmap.remove(queryVar);
-////        List<Double> list = new ArrayList<>();
-////        list.add(Math.round((top.getProbability(topmap) / buton.getProbability(butonmap)) * 100000.0) / 100000.0);
-////        list.add(multCount);
-////        list.add(addCount);
-//        Factor f=finall.variable_Elimination(List.of(queryVar));
-//        multCount+=finall.multCount;
+//            factors.remove(merged);
+//            int addtemp=merged.values.size();
+//             finalFactor = merged.variable_Elimination(factorsWithChar.get(0).getnams().stream().filter(name -> !name.equals(charToRemove)).collect(Collectors.toList()));
+//            addC += addtemp-finalFactor.values.size();
+//            addCount+=merged.addCount;
+//            factors.add(finalFactor);
+
+
+        }
+        return finalFactor;
+    }
+    @Override
+    public List<Double> calc() {
+        multC = 0;
+        addC = 0;
+
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
+        Map<String, List<String>> q = baceStrategy.questionsToMap(question);
+        String queryVar = q.keySet().iterator().next();
+        List<String> evidenceVars = q.get(queryVar);
+
+
+        Map<String, String> evidence = baceStrategy.extractEvidence(question);
+        Map<String, String> queryAssign = baceStrategy.extractQueryAssignment(question);
+        Map<String, String> all = new HashMap<>(evidence);
+        all.putAll(queryAssign);
+
+
+        Map<String, String> allAssignments = baceStrategy.extractEvidence(question);
+        boolean chek = true;
+        List<Factor> factors = new ArrayList<>();
+
+        List<String> factorNames =getAllRelevantVariables(question);
+
+        for (Variable v : variableMap.values()) {
+            chek = true;
+            Factor t=new Factor(v.getCPT(),fileName).restrict(allAssignments);
+            if(!(t.getvalues().size()==1||t.getvalues().size()==0)){
+                if(factorNames.contains(v.getName())){
+                    factors.add(t);
+                }
+            }
+
+
+
+            Factor t1=new Factor(v.getCPT(),fileName);
+            if(t1.nams.size()==baceStrategy.extractEvidence(question).size()+baceStrategy.extractQueryAssignment(question).size()) {
+
+                for (String s : all.keySet()) {
+                    if (!t1.nams.contains(s) ) {
+                        chek = false;
+                        break;
+                    }
+                }
+                if(chek){
+                    t1=new Factor(v.getCPT(),fileName).restrict(allAssignments);
+                    List<String> keys = new ArrayList<>(all.keySet());
+
+                    int addtemp=t1.values.size();
+                    t1=t1.variable_Elimination(keys);//הוספה של שאר משתנה השאלה
+                    addC += addtemp-t1.values.size();
+
+//                    multCount+=t1.multCount;
+//                    addCount+=t1.addCount;
+                    List<Double> list = new ArrayList<>();
+                    list.add((double) Math.round((t1.getProbability(baceStrategy.extractQueryAssignment(question))) * 100000.0) / 100000.0);
+                    list.add(multC*1.0);
+                    list.add(addC*1.0);
+                    return list;
+                }
+            }
+        }
+        Factor finall =eliminateAllVariables(factors,queryVar);
+
+
+        int addtemp=finall.values.size();
+
+        finall=finall.variable_Elimination(List.of(queryVar));
+        addC += addtemp-finall.values.size();
 //        addCount+=finall.addCount;
-//        f.normalize();
+
+        finall.normalize();
+        addC += finall.values.size()-1;
+//        addCount+=finall.addCount;
         List<Double> list = new ArrayList<>();
-//        list.add((double) Math.round(f.getProbability(baceStrategy.extractQueryAssignment(question)) * 100000.0) / 100000.0);
-       list.add(0.0);
-        list.add(0.0);
-        list.add(0.0);
+        list.add((double) Math.round(finall.getProbability(baceStrategy.extractQueryAssignment(question)) * 100000.0) / 100000.0);
+        list.add(multC*1.0);
+        list.add(addC*1.0);
+
         return list;
     }
-    private List<Factor> FactortoTemove(List<Factor> factors, List<String> evidenceVars) {
-        List<Factor> temp = new ArrayList<>();
-        Map<String, Set<String>> map = new HashMap<>();
 
-        // בונה גרף של משתנים ושכנות (לפי הופעה משותפת בפאקטורים)
-        for (Factor f : factors) {
-            List<String> vars = f.getnams();
-            for (String v : vars) {
-                map.putIfAbsent(v, new HashSet<>());
-                for (String other : vars) {
-                    if (!other.equals(v)) {
-                        map.get(v).add(other);
+
+
+    private List<String> getAllRelevantVariables(String question) {
+        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
+        Set<String> relevant = new HashSet<>();
+        Queue<String> queue = new LinkedList<>();
+
+        // הוסף את משתנה השאילתה ואת משתני העדויות
+        queue.add(baceStrategy.getQueryVariable(question));
+        queue.addAll(baceStrategy.extractEvidence(question).keySet());
+
+        while (!queue.isEmpty()) {
+            String var = queue.poll();
+            if (relevant.add(var)) { // מוסיף אם עדיין לא היה
+                Variable v = variableMap.get(var);
+                if (v != null) {
+                    for (Variable parent : v.getParents()) {
+                        queue.add(parent.getName());
                     }
                 }
             }
         }
 
-        // ממיין את המשתנים לפי מספר שכנים (min-degree heuristic)
-        List<Map.Entry<String, Set<String>>> list = new ArrayList<>(map.entrySet());
-        list.sort(Comparator.comparingInt(e -> e.getValue().size()));
-
-        // מוסיף גם את משתנה השאילתה לרשימת ההגנה
-        List<String> protectedVars = new ArrayList<>(evidenceVars);
-        protectedVars.add(baceStrategy.getQueryVariable(question));
-
-        // בוחר משתנה לסילוק שלא חלק מהשאלה
-        String eliminateVar = null;
-        for (Map.Entry<String, Set<String>> entry : list) {
-            if (!protectedVars.contains(entry.getKey())) {
-                eliminateVar = entry.getKey();
-                break;
-            }
-        }
-        // אם לא נמצא – בחר את המשתנה עם הכי פחות שכנים
-        if (eliminateVar == null) {
-            eliminateVar = list.get(0).getKey();
-        }
-
-        // מאחד את כל הפאקטורים שכוללים את eliminateVar
-        Factor tempf = null;
-        for (Factor f : factors) {
-            if (f.getnams().contains(eliminateVar)) {
-                if (tempf == null) {
-                    tempf = f;
-                } else {
-                    tempf = tempf.unione(f);
-                    multCount += tempf.multCount;
-                    addCount += tempf.addCount;
-                }
-            } else {
-                temp.add(f);
-            }
-        }
-        final String finalEliminateVar = eliminateVar;
-        tempf = tempf.variable_Elimination(
-                tempf.getnams().stream()
-                        .filter(var -> !var.equals(finalEliminateVar)) // ✅ עכשיו זה תקין
-                        .toList()
-        );
-
-        multCount += tempf.multCount;
-        addCount += tempf.addCount;
-
-        temp.add(tempf);
-        return temp;
+        return new ArrayList<>(relevant);
     }
-
-//    private List<Factor> FactortoTemove( List<Factor> factors,List<String> evidenceVars) {
-//        List<Factor> temp = new ArrayList<>();
-////        Map<String, Integer> map = new HashMap<>();
-//        Map<String, Set<String>> map = new HashMap<>();
-//        for (Factor f : factors) {
-//            List<String> vars = f.getnams();
-//            for (String v : vars) {
-//                map.putIfAbsent(v, new HashSet<>());
-//                for (String other : vars) {
-//                    if (!other.equals(v)) {
-//                        map.get(v).add(other);
-//                    }
-//                }
-//            }
-//        }
-//
-//        List<Map.Entry<String, Set<String>>> list = new ArrayList<>(map.entrySet());
-//
-//        list.sort(Comparator.comparingInt(e -> e.getValue().size()));
-//        Factor tempf = null;
-//        for (Factor f : factors) {
-//            if (f.getnams().contains(list.get(0).getKey())){
-//                if(tempf==null){
-//                    tempf = f;
-//                }
-//                else {
-//                    tempf.unione(f);
-//                    multCount+=tempf.multCount;
-//                    addCount+=tempf.addCount;
-//                }
-//            }
-//            else {
-//                temp.add(f);
-//            }
-//        }
-//        tempf=tempf.variable_Elimination(evidenceVars);
-//        multCount+=tempf.multCount;
-//        addCount+=tempf.addCount;
-//        temp.add(tempf);
-//        return temp;
-//    }
-    private static Map<String, String> queryToMap(String query, String fileName) {
-        Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
-        Map<String, String> map = new HashMap<>();
-        String inside = query.substring(2, query.length() - 1); // מוריד את P( )
-        for (String part : inside.split("[,|]")) {
-            String[] split = part.split("="); // מפרק ל: משתנה וערך
-            String varName = split[0].trim();
-            String outcome = split[1].trim();
-            Variable var = variableMap.get(varName);
-            if (var == null) {
-                throw new RuntimeException("Variable not found: " + varName);
-            }
-            List<String> outcomes = var.getOUTCOMES();
-            if (!outcomes.contains(outcome)) {
-                throw new RuntimeException("Outcome '" + outcome + "' not found in variable " + varName);
-            }
-            map.put(varName, outcome);
-        }
-        return map;
-    }
-
-
     public static void main(String[] args) {
-        VariableElimination s = new VariableElimination("P(B=T|J=T,M=T)", "alarm_net.xml");
+        Algorithm3 s = new Algorithm3("P(J=T|B=T)", "alarm_net.xml");
 
         System.out.println("Result: " + s.calc());
-        System.out.println(s.multCount);
-        System.out.println(s.addCount);
+
     }
 
 
