@@ -16,33 +16,19 @@ public interface baceStrategy {
         }
         return variableMap;
     }
-    static Map<String, String> questionsToMap(List<String> questions) {
-        Map<String, String> assignment = new HashMap<>();
-        for (String q : questions) {
-            if (q.contains("=")) {
-                String[] parts = q.split("=");
-                String var = parts[0].trim();
-                String val = parts[1].trim();
-                assignment.put(var, val);
-            }
-        }
-        return assignment;
-    }
     public static Map<String, List<String>> questionsToMap(String question) {
         Map<String, List<String>> map = new HashMap<>();
 
         if (!question.contains("|")) {
-            // שאלה לא מותנית: P(B=T)
             String[] parts = question.replace("P(", "").replace(")", "").split("=");
             String var = parts[0].trim();
             map.put(var, new ArrayList<>());
         } else {
-            // שאלה מותנית: P(B=T | J=T, M=T)
             question = question.replace("P(", "").replace(")", "");
             String[] parts = question.split("\\|");
 
-            String left = parts[0].trim();  // B=T
-            String right = parts[1].trim(); // J=T, M=T
+            String left = parts[0].trim();
+            String right = parts[1].trim();
 
             String queryVar = left.split("=")[0].trim();
             String[] evidenceAssignments = right.split(",");
@@ -63,7 +49,6 @@ public interface baceStrategy {
         List<Variable> parents = var.getParents();
         List<Integer> domainSizes = new ArrayList<>();
 
-        // סדר: ההורים ואז המשתנה עצמו
         for (Variable p : parents) {
             domainSizes.add(p.getValues().size());
         }
@@ -77,7 +62,6 @@ public interface baceStrategy {
             String value = orderedValues.get(i);
             int valIndex = currVar.getOUTCOMES().indexOf(value);
 
-//            int valIndex = currVar.getValues().indexOf(value);
             if (valIndex == -1) {
                 valIndex = currVar.getOUTCOMES().indexOf(value.toLowerCase());
                 if (valIndex == -1) {
@@ -92,10 +76,10 @@ public interface baceStrategy {
     }
 
     public static String getQueryVariable(String question) {
-        String inner = question.substring(2, question.length() - 1); // מסיר את P( ו־)
+        String inner = question.substring(2, question.length() - 1);
         String[] parts = inner.split("\\|");
-        String queryPart = parts[0].trim(); // למשל "B=T"
-        return queryPart.split("=")[0].trim(); // מחזיר רק את שם המשתנה: "B"
+        String queryPart = parts[0].trim();
+        return queryPart.split("=")[0].trim();
     }
 
 
@@ -108,7 +92,7 @@ public interface baceStrategy {
         for (String part : parts) {
             String[] split = part.split("=");
             String var = split[0].trim();
-            String val = split[1].trim().toUpperCase(); // T or F
+            String val = split[1].trim().toUpperCase();
             result.put(var, val);
         }
 
@@ -118,7 +102,6 @@ public interface baceStrategy {
         Map<String, String> result = new HashMap<>();
 
         if (!question.contains("|")) {
-            // שאלה לא מותנית
             String inside = question.substring(2, question.length() - 1);
             String[] assignments = inside.split(",");
             for (String part : assignments) {
@@ -126,7 +109,6 @@ public interface baceStrategy {
                 result.put(split[0].trim(), split[1].trim());
             }
         } else {
-            // שאלה מותנית: P(X=... | Y=..., Z=...)
             String inside = question.substring(2, question.length() - 1);
             String[] parts = inside.split("\\|");
             String[] queryAssignments = parts[0].trim().split(",");
@@ -143,13 +125,13 @@ public interface baceStrategy {
         Map<String, String> evidenceMap = new LinkedHashMap<>();
 
         if (!question.contains("|")) {
-            return evidenceMap; // אין evidence
+            return evidenceMap;
         }
 
         String[] parts = question.substring(2, question.length() - 1).split("\\|");
         if (parts.length < 2) return evidenceMap;
 
-        String evidencePart = parts[1].trim(); // לדוגמה: "J=T,M=T"
+        String evidencePart = parts[1].trim();
         String[] assignments = evidencePart.split(",");
 
         for (String assign : assignments) {

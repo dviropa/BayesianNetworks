@@ -2,9 +2,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CPT {
-    Variable variable; // המשתנה הראשי (FOR)
-    List<Variable> parents = new ArrayList<>(); // GIVENs
-    List<Double> probabilities = new ArrayList<>(); // לפי הסדר ב-TABLE
+    Variable variable;
+    List<Variable> parents = new ArrayList<>();
+    List<Double> probabilities = new ArrayList<>();
 
     public CPT(Variable variable) {
         this.variable = variable;

@@ -36,7 +36,6 @@ public class Factor {
             this.nams.add(v.getName());
         }
         this.nams.add(c.variable.getName());
-//        System.out.println("cpt: " + c.toString());
 
     }
 
@@ -74,9 +73,6 @@ public class Factor {
                 return i;
             }
         }
-
-        // הדפסה לדיבאג
-//        System.out.println(" Combo not found: " + assignment);
         return -1;
     }
 
@@ -86,9 +82,7 @@ public class Factor {
             assignment.put(s, assignment.get(s).toUpperCase());
         }
         int index = getCombinationIndex(this.nams, assignment, fileName);
-        if (index == -1) {
-//            System.out.println(" Combo not found: " + assignment);
-        }
+
         return this.values.get(index);
     }
 
@@ -103,9 +97,7 @@ public class Factor {
             if (combinations.get(i).equals(targetAssignment)) {
                 return i;
             }
-//            if (combinations.get(i).contain(targetAssignment)) {
-//                return i;
-//            }
+
         }
 
         return -1;
@@ -173,8 +165,7 @@ public class Factor {
 
         }
 
-//        System.out.println("[UNION] New scope: " + allVarNames);
-//        System.out.println("[UNION] Values: " + newValues);
+
 
         return new Factor(newScope, newValues, allVarNames, fileName);
     }
@@ -193,7 +184,7 @@ public class Factor {
         addCount+=values.size()-1;
     }
     public Factor variable_Elimination(List<String> keepNames) {
-        // סינון משתנים שרלוונטיים לפאקטור
+        // Filter variables relevant to the factor
         List<String> filteredKeepNames = keepNames.stream()
                 .filter(this.nams::contains)
                 .collect(Collectors.toList());
@@ -203,13 +194,11 @@ public class Factor {
 
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
 
-        // משתנים שצריך לאחד אותם (להעלים)
         List<String> eliminateNames = this.scope.stream()
                 .map(Variable::getName)
                 .filter(name -> !filteredKeepNames.contains(name))
                 .collect(Collectors.toList());
 
-        // יוצרים את כל הקומבינציות עבור המשתנים שאותם נשמור
         List<Map<String, String>> keepCombinations = generateOutcomeCombinations(variableMap, filteredKeepNames);
         List<Double> newValues = new ArrayList<>();
 
@@ -226,7 +215,6 @@ public class Factor {
             newValues.add(sum);
         }
 
-        // יוצרים את הסקופ החדש לאחר ההעלמה
         List<Variable> newScope = this.scope.stream()
                 .filter(v -> filteredKeepNames.contains(v.getName()))
                 .collect(Collectors.toList());
@@ -238,7 +226,7 @@ public class Factor {
     public Factor restrict(Map<String, String> restrictions) {
         Map<String, Variable> variableMap = baceStrategy.getVariable(fileName);
 
-        // משתנים חדשים - אחרי הסרת המשתנים שהוצבו
+        // New variables - after removing the set variables
         List<Variable> newScope = new ArrayList<>();
         List<String> newNams = new ArrayList<>();
 
@@ -249,7 +237,7 @@ public class Factor {
             }
         }
 
-        // כל הצירופים האפשריים של המשתנים החדשים
+        // All possible combinations of the new variables
         List<Map<String, String>> combinations = generateOutcomeCombinations(variableMap, newNams);
 
         List<Double> newValues = new ArrayList<>();

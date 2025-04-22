@@ -22,18 +22,18 @@ public class Algorithm3 implements baceStrategy{
         while (nams.size() > 1) {
             nams.sort(Comparator.comparing(Set::size));
 
-            Set<String> s = new HashSet<>(nams.get(1)); // נעתיק לפני שמאחדים
+            Set<String> s = new HashSet<>(nams.get(1));
             s.addAll(nams.get(0));
 
             int c1 = 1;
             for (String n : s) {
-                c1 *= variableMap.get(n).getValues().size(); // מספר הערכים האפשריים למשתנה
+                c1 *= variableMap.get(n).getValues().size();
             }
 
             c += c1;
 
             nams.remove(0);
-            nams.remove(0); // גם את המקורי של index 1, כי הוא זז להיות index 0
+            nams.remove(0);
             nams.add(s);
         }
 
@@ -80,14 +80,12 @@ public class Algorithm3 implements baceStrategy{
                 List<Factor> factorsWithChar = getFactorscontiningminchar(queryVar, factors);
                 while (factorsWithChar.size() > 1) {
 
-                    // מיין לפי מספר משתנים
                     List<Factor> sorted = sortFactorsByVariableCount(factorsWithChar);
 
                     Factor f1 = sorted.get(0);
                     Factor f2 = sorted.get(1);
 
                     merged = f1.unione(f2);
-//                    multCount+=f1.multCount;
                     multC += merged.values.size();
                     factorsWithChar.remove(f1);
                     factorsWithChar.remove(f2);
@@ -101,8 +99,8 @@ public class Algorithm3 implements baceStrategy{
             List<Factor> factorsWithChar = getFactorscontiningminchar(charToRemove, factors);
 
             while (factorsWithChar.size() > 1) {
-                // מיין לפי מספר משתנים
-                List<Factor> sorted = sortFactorsByVariableCount(factorsWithChar);
+
+                 List<Factor> sorted = sortFactorsByVariableCount(factorsWithChar);
 
                 Factor f1 = sorted.get(0);
                 Factor f2 = sorted.get(1);
@@ -110,13 +108,14 @@ public class Algorithm3 implements baceStrategy{
                 merged = f1.unione(f2);
                 multC += merged.values.size();
 
-//                multCount+=f1.multCount;
-
                 factorsWithChar.remove(f1);
                 factorsWithChar.remove(f2);
+
                 factorsWithChar.add(merged);
+
                 factors.remove(f1);
                 factors.remove(f2);
+
                 factors.add(merged);
 
 
@@ -133,33 +132,11 @@ public class Algorithm3 implements baceStrategy{
                                         .collect(Collectors.toList())
                         );
                         addC += addtemp-finalFactor.values.size();
-//                        addCount+=merged.addCount;
                         factors.add(finalFactor);
                         factorsWithChar.add(finalFactor);
                     }
                 }
             }
-            //            factors.remove(merged);
-//            merged=factorsWithChar.get(0);
-//            for (String s : merged.getnams()) {
-//                List<Factor> temp =getFactorscontiningminchar(s, factors);
-//                if(temp.size()==1&&!s.equals(queryVar)) {
-//                    merged=temp.get(0);
-//                    factors.remove(merged);
-//                    int addtemp=merged.values.size();
-//                    finalFactor = merged.variable_Elimination(factorsWithChar.get(0).getnams().stream().filter(name -> !name.equals(charToRemove)).collect(Collectors.toList()));
-//                    addC += addtemp-finalFactor.values.size();
-//                    addCount+=merged.addCount;
-//                    factors.add(finalFactor);
-//                }
-//            }
-//            factors.remove(merged);
-//            int addtemp=merged.values.size();
-//             finalFactor = merged.variable_Elimination(factorsWithChar.get(0).getnams().stream().filter(name -> !name.equals(charToRemove)).collect(Collectors.toList()));
-//            addC += addtemp-finalFactor.values.size();
-//            addCount+=merged.addCount;
-//            factors.add(finalFactor);
-
 
         }
         return finalFactor;
@@ -212,11 +189,9 @@ public class Algorithm3 implements baceStrategy{
                     List<String> keys = new ArrayList<>(all.keySet());
 
                     int addtemp=t1.values.size();
-                    t1=t1.variable_Elimination(keys);//הוספה של שאר משתנה השאלה
+                    t1=t1.variable_Elimination(keys);
                     addC += addtemp-t1.values.size();
 
-//                    multCount+=t1.multCount;
-//                    addCount+=t1.addCount;
                     List<Double> list = new ArrayList<>();
                     list.add((double) Math.round((t1.getProbability(baceStrategy.extractQueryAssignment(question))) * 100000.0) / 100000.0);
                     list.add(multC*1.0);
@@ -232,11 +207,9 @@ public class Algorithm3 implements baceStrategy{
 
         finall=finall.variable_Elimination(List.of(queryVar));
         addC += addtemp-finall.values.size();
-//        addCount+=finall.addCount;
 
         finall.normalize();
         addC += finall.values.size()-1;
-//        addCount+=finall.addCount;
         List<Double> list = new ArrayList<>();
         list.add((double) Math.round(finall.getProbability(baceStrategy.extractQueryAssignment(question)) * 100000.0) / 100000.0);
         list.add(multC*1.0);
@@ -252,13 +225,12 @@ public class Algorithm3 implements baceStrategy{
         Set<String> relevant = new HashSet<>();
         Queue<String> queue = new LinkedList<>();
 
-        // הוסף את משתנה השאילתה ואת משתני העדויות
         queue.add(baceStrategy.getQueryVariable(question));
         queue.addAll(baceStrategy.extractEvidence(question).keySet());
 
         while (!queue.isEmpty()) {
             String var = queue.poll();
-            if (relevant.add(var)) { // מוסיף אם עדיין לא היה
+            if (relevant.add(var)) {
                 Variable v = variableMap.get(var);
                 if (v != null) {
                     for (Variable parent : v.getParents()) {

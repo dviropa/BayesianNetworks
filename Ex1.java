@@ -14,7 +14,6 @@ public class Ex1 {
                 handler.setStrategyByNumber(task.algorithmNumber);
                 List<Double> result = handler.calc();
                 if (result != null) {
-//                    System.out.printf("%.5f,%.0f,%.0f%n", result.get(0), result.get(1), result.get(2));
                     writer.write(String.format("%.5f,%.0f,%.0f%n", result.get(0), result.get(2), result.get(1)));
                 }
             }
@@ -59,7 +58,7 @@ public class Ex1 {
                     parsed.fileName = line;
                     isFirstLine = false;
                 } else {
-                    int algorithm = 4; // ברירת מחדל
+                    int algorithm = 4;
 
                     int lastComma = line.lastIndexOf(',');
                     if (lastComma != -1) {

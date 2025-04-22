@@ -31,14 +31,13 @@ public class ReadXMLFile {
             NodeList outcomes = varElem.getElementsByTagName("OUTCOME");
             for (int j = 0; j < outcomes.getLength(); j++) {
                 String outcomeValue = outcomes.item(j).getTextContent().trim();
-                variable.addOutcome(outcomeValue);        // לשימוש פנימי
-                variable.addToOutcomes(outcomeValue);     // לשמירה ישירה מה-XML
+                variable.addOutcome(outcomeValue);
+                variable.addToOutcomes(outcomeValue);
             }
 
             variableMap.put(varName, variable);
         }
 
-        // קריאת <DEFINITION>
         NodeList definitions = document.getElementsByTagName("DEFINITION");
         for (int i = 0; i < definitions.getLength(); i++) {
             Element defElem = (Element) definitions.item(i);

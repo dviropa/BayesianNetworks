@@ -7,7 +7,7 @@ public class Variable {
     private List<String> OUTCOMES = new ArrayList<>();  // חובה לאתחל!
 
     private List<Variable> parents = new ArrayList<>();
-    private CPT cpt;  // טבלת הסתברויות מותנות
+    private CPT cpt;
 
     public Variable(String name) {
         this.name = name;
